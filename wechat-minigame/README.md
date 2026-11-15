@@ -5,7 +5,8 @@
 ## 在微信开发者工具中运行
 1. 下载并安装「微信开发者工具」，选择「小游戏」项目。
 2. 导入本目录 wechat-minigame/（project.config.json 已设 compileType=game）。
-3. 将 project.config.json 的 appid 从 touristappid 改为你注册的小游戏 AppID（测试可先用测试号）。
+3. 将 project.config.json 的 appid 从 touristappid 改为你注册的小游戏 AppID（未注册前可用「测试号」）。
+   注意：正式提审前必须换成正式 AppID，否则无法绑定软著与备案。
 4. 编译即可在模拟器/真机预览。
 
 ## 重新生成核心 bundle

@@ -1197,7 +1197,7 @@ body.ingame #btn-touch-shoot{min-width:0}
 .spin-widget.open{transform:translateY(-50%)}
 
 /* ---------- ④ 断点 ---------- */
-/* 手机竖屏：参照《台球冠军》——顶部只有一条很矮的信息条，球台完整不被压，
+/* 手机竖屏：顶部只保留一条矮信息条，球台完整不被压，
    右侧单独一条控件带，底部只有细尺子。所有尺度都跟"球台必须看得见"对齐。 */
 @media (orientation:portrait) and (max-width:1024px){
   /* 顶部信息条：34px 一条，工具键并进去，不再绝对定位压到台呢上 */
@@ -1239,7 +1239,7 @@ body.ingame #btn-touch-shoot{min-width:0}
   body.ingame .hud-side-right #power-value{font-size:14px;font-weight:800;color:#ffd964;
     text-shadow:0 1px 3px rgba(0,0,0,.9);min-width:0}
   /* 竖屏不再用那个大号斜体数字：它会顶到击球点圆钮上 */
-  /* 参考《台球冠军》：大号力度数字贴在条顶端，向下拖时实时变化 */
+  /* 大号力度数字贴在条顶端，向下拖时实时变化 */
   body.ingame .power-number{display:block;top:-32px;left:50%;transform:translateX(-50%);font-size:28px;font-style:normal;line-height:1;color:#ffe38b;text-shadow:0 2px 0 #6f4308,0 0 14px rgba(255,200,80,.5)}
   /* 拉长的力度条：上下两端做成对称的量尺，正中一颗金色菱形游标 */
   body.ingame .hud-side-right .power-track{width:26px;height:min(38vh,340px);border-radius:13px;
@@ -1402,7 +1402,7 @@ body.browser-compat .menu-glow::after,body.touch-device .menu-glow::after{displa
 
 
 /* ============================================================
-   v10 布局层 —— 对照《台球冠军》重排（覆盖所有更早的层）
+   v10 布局层 —— 顶栏与控件带重排（覆盖所有更早的层）
    ① 顶栏：头像 + 进球洞 + VS + 进球洞 + 头像（少文字）
    ② 底栏：单行 = 球杆 / 角度尺 / 角度键 / 金币，高度 ≤ 顶栏
    ③ 工具键移出顶栏（手机：顶栏下方一行；桌面：留在右侧）
@@ -1616,7 +1616,7 @@ body.ingame .hud-coins .ico{width:16px;height:16px}
 
 
 /* ============================================================
-   v11 布局层 —— 再次对照《台球冠军》
+   v11 布局层 —— 顶栏形态二次调整
    ① 顶栏 / 底栏宽度都等于球台外框（--table-l / --table-w 由 JS 写入）
    ② 手机端 4 个功能键移到右侧控件带的上方 / 下方
    ③ 手机端角度尺回到球台下方、与球台同宽，4 个角度键放在尺子下面
@@ -1707,7 +1707,7 @@ body.ingame .ball-chip span{
 
 
 /* ============================================================
-   v11b 顶栏形态 —— 照《台球冠军》：整条面板横贯球台，
+   v11b 顶栏形态 —— 整条面板横贯球台，
    球位分列两端、头像紧贴 VS 两侧；当前回合用头像呼吸光表示（不写字）
    ============================================================ */
 body.ingame .hud-top{
