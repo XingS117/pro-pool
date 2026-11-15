@@ -8,8 +8,8 @@ const work = path.join(__dirname, '_mg_run');
 fs.rmSync(work, { recursive: true, force: true });
 fs.mkdirSync(work, { recursive: true });
 for (const f of ['adapter.js', 'core.js', 'mg-main.js']) fs.copyFileSync(path.join(MG, f), path.join(work, f));
-fs.copyFileSync(path.join(__dirname, '_mg_canvas_stub.js'), path.join(work, 'canvas-stub.js'));
-fs.copyFileSync(path.join(__dirname, '_mg_harness.js'), path.join(work, 'harness.js'));
+fs.copyFileSync(path.join(__dirname, 'mg_canvas_stub.js'), path.join(work, 'canvas-stub.js'));
+fs.copyFileSync(path.join(__dirname, 'mg_harness.js'), path.join(work, 'harness.js'));
 let sim = null, err = null;
 try {
   const simulate = require(path.join(work, 'harness.js'));
