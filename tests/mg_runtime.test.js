@@ -7,7 +7,7 @@ const MG = path.join(__dirname, '..', 'wechat-minigame');
 const work = path.join(__dirname, '_mg_run');
 fs.rmSync(work, { recursive: true, force: true });
 fs.mkdirSync(work, { recursive: true });
-for (const f of ['adapter.js', 'core.js', 'mg-main.js']) fs.copyFileSync(path.join(MG, f), path.join(work, f));
+for (const f of ['adapter.js', 'core.js', 'mg-main.js', 'game.js']) fs.copyFileSync(path.join(MG, f), path.join(work, f));
 fs.copyFileSync(path.join(__dirname, 'mg_canvas_stub.js'), path.join(work, 'canvas-stub.js'));
 fs.copyFileSync(path.join(__dirname, 'mg_harness.js'), path.join(work, 'harness.js'));
 let sim = null, err = null;
@@ -25,6 +25,7 @@ function ok(n, c, d) { if (c) pass++; else { fail++; bad.push(n + ' :: ' + (d ||
 const has = s => out.indexOf(s) >= 0;
 ok('adapter 加载成功', has('ADAPTER_OK'), out.slice(0, 300));
 ok('核心模块加载成功', has('CORE_OK'), out.slice(0, 300));
+ok('game.js 入口加载成功', has('GAME_ENTRY_OK'), out.slice(0, 400));
 ok('小游戏主程序加载成功', has('MG_OK'), out.slice(0, 400));
 ok('wx.createCanvas 可用', has('adapterCanvas=true'));
 ok('AudioContext 映射', has('adapterAudioCtx=function'));

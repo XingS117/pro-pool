@@ -29,11 +29,8 @@ module.exports = function simulate() {
     require('./adapter.js'); log('ADAPTER_OK'); }
   catch (e) { log('ADAPTER_ERR: ' + e.stack.slice(0, 400)); return { results: results, calls: calls, listeners: listeners }; }
   try {
-    require('./core.js'); log('CORE_OK'); }
-  catch (e) { log('CORE_ERR: ' + e.stack.slice(0, 400)); return { results: results, calls: calls, listeners: listeners }; }
-  try {
-    require('./mg-main.js'); log('MG_OK'); }
-  catch (e) { log('MG_ERR: ' + e.stack.slice(0, 500)); return { results: results, calls: calls, listeners: listeners }; }
+    require('./game.js'); log('GAME_ENTRY_OK'); log('CORE_OK'); log('MG_OK'); }
+  catch (e) { log('MG_ERR: ' + e.stack.slice(0, 600)); return { results: results, calls: calls, listeners: listeners }; }
   log('adapterCanvas=' + (typeof wx.createCanvas === 'function'));
   log('adapterAudioCtx=' + (typeof window.AudioContext));
   log('adapterStorage=' + (typeof window.localStorage));
