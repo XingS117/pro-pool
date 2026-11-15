@@ -1,0 +1,11 @@
+node_modules/
+dist/
+tests/*.png
+tests/*.jpg
+tests/_*
+.frames/
+.workbuddy/
+*.key
+*.pem
+Thumbs.db
+.DS_Store

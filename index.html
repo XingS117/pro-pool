@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#070a08">
+<meta name="description" content="在线台球小游戏，打开网页就能玩，免下载、免注册、无广告。自研物理引擎还原摩擦、旋转与碰撞，支持八球单人对机器人、同屏双人、12 关闯关与球杆收集；电脑鼠标操作，手机横屏触控也能玩。">
+<meta name="keywords" content="在线台球,网页台球,台球小游戏,免下载台球,八球游戏,2D台球,浏览器台球,双人台球,手机台球,PRO POOL,即刻开球">
+<meta property="og:title" content="打开网页就能打台球 · 免下载八球对战">
+<meta property="og:description" content="自研物理引擎：高杆低杆左右塞都能打，单人挑机器人、同屏双人、12 关闯关。电脑手机都能玩，点开即开局。">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="PRO POOL · 即刻开球">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:url" content="https://www.xingshuwen.com/games/pool/">
+<meta property="og:image" content="https://www.xingshuwen.com/games/pool/og-cover-pool.png">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="即刻开球 PRO POOL：暗绿台呢与胡桃木球桌的在线八球游戏">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="打开网页就能打台球 · 免下载八球对战">
+<meta name="twitter:description" content="真实物理八球小游戏：单人/双人、12 关挑战、球杆收集，电脑手机都能玩。">
+<meta name="twitter:image" content="https://www.xingshuwen.com/games/pool/og-cover-pool.png">
+<meta name="author" content="文哥">
+<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+<link rel="canonical" href="https://www.xingshuwen.com/games/pool/">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"即刻开球 · PRO POOL","alternateName":"PRO POOL","url":"https://www.xingshuwen.com/games/pool/","description":"在线台球小游戏：自研物理引擎还原摩擦、旋转与碰撞，支持单人挑战机器人、同屏双人、12 关闯关与球杆收集，免下载、免注册，电脑与手机浏览器均可游玩。","genre":["Sports","Casual","Billiards"],"gamePlatform":"Web browser","applicationCategory":"GameApplication","operatingSystem":"Web","isAccessibleForFree":true,"inLanguage":["zh-CN"],"image":"https://www.xingshuwen.com/games/pool/og-cover-pool.png","keywords":"在线台球,网页台球,台球小游戏,免下载台球,八球游戏,双人台球","author":{"@type":"Person","name":"文哥","url":"https://www.xingshuwen.com/"},"publisher":{"@type":"Person","name":"文哥","url":"https://www.xingshuwen.com/"}}</script>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2064%2064'%3E%3Ccircle%20cx='32'%20cy='32'%20r='30'%20fill='%230d0f0d'/%3E%3Ccircle%20cx='32'%20cy='32'%20r='28.5'%20fill='none'%20stroke='%23c8a45f'%20stroke-width='2'/%3E%3Ccircle%20cx='32'%20cy='32'%20r='13'%20fill='%23f2ede2'/%3E%3Ctext%20x='32'%20y='38'%20text-anchor='middle'%20font-family='Georgia,serif'%20font-size='18'%20font-weight='700'%20fill='%2312100d'%3E8%3C/text%3E%3C/svg%3E">
+<title>在线台球小游戏 · 免下载八球对战（手机可玩）| 即刻开球 PRO POOL</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<svg class="icon-sprite" aria-hidden="true" focusable="false">
+  <symbol id="i-coin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="6.5"/><path d="M9.1 8.2 12 11.2l2.9-3M12 11.2v5.6M9.4 12.7h5.2M9.4 14.8h5.2"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1L3.2 9.5l6.1-.9L12 3Z"/></symbol>
+  <symbol id="i-trophy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v4.6a4 4 0 0 1-8 0V4Z"/><path d="M8 5.6H5.4v1.2a3 3 0 0 0 3 3M16 5.6h2.6v1.2a3 3 0 0 1-3 3"/><path d="M12 12.8v3.4M8.6 20h6.8M9.6 20v-2.4h4.8V20"/></symbol>
+  <symbol id="i-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="4.4"/><circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/><path d="M12 1.8v2.3M12 19.9v2.3M1.8 12h2.3M19.9 12h2.3"/></symbol>
+  <symbol id="i-cue" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3.6 20.4 18.2 5.8"/><path d="m17.1 3.5 3.4 3.4-2.3 2.3-3.4-3.4 2.3-2.3Z"/><circle cx="5.4" cy="18.6" r="2.3"/></symbol>
+  <symbol id="i-power" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M13.4 2.6 5.7 13.2h5.1l-.9 8.2 7.7-10.7h-5.1l.9-8.1Z"/></symbol>
+  <symbol id="i-angle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="8.4"/><path d="M12 12 16.7 7.3"/><path d="M12 3.6v2M20.4 12h-2M12 20.4v-2M3.6 12h2"/></symbol>
+  <symbol id="i-spin" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="8.4"/><path d="M12 3.6v16.8M3.6 12h16.8"/><circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-ball8" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="8.4"/><circle cx="12" cy="12" r="3.7" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-diamond" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M12 2.8 21.2 12 12 21.2 2.8 12 12 2.8Z"/><path d="M12 7.6 16.4 12 12 16.4 7.6 12 12 7.6Z"/></symbol>
+  <symbol id="i-crown" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="m3 8 4.2 3.2L12 5l4.8 6.2L21 8l-1.6 10H4.6L3 8Z"/><path d="M5 20.4h14"/></symbol>
+  <symbol id="i-shop" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h16l-1.2 12H5.2L4 8Z"/><path d="M8.5 8V6a3.5 3.5 0 0 1 7 0v2"/></symbol>
+  <symbol id="i-help" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="8.4"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8.9c0 1.7-2.4 2-2.4 3.6"/><circle cx="12" cy="17.2" r=".9" fill="currentColor" stroke="none"/></symbol>
+  <symbol id="i-expand" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5"/></symbol>
+  <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m4.5 12.5 5 5 10-10"/></symbol>
+  <symbol id="i-lock" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="10.4" width="14" height="9.6" rx="1.4"/><path d="M8 10.4V7a4 4 0 0 1 8 0v3.4"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M4 20V11.5M9.3 20V5M14.7 20v-7M20 20V8.5"/></symbol>
+</svg>
+<div id="app">
+  <canvas id="game-canvas" aria-label="台球桌"></canvas>
+  <div class="canvas-shade" aria-hidden="true"></div>
+
+  <section id="hud" class="hidden" aria-hidden="true">
+    <header class="hud-top">
+      <div class="brand-mini">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="1.2"/><circle cx="12" cy="12" r="3.2" fill="currentColor"/></svg>
+        <span>PRO POOL</span>
+      </div>
+
+      <div class="scoreboard">
+        <article class="player-card" id="player-card-0">
+          <div class="avatar" id="avatar-0">你</div>
+          <div class="player-meta">
+            <span class="player-name" id="player-name-0">玩家</span>
+            <span class="player-group" id="player-group-0">球组待定</span>
+          </div>
+          <div class="ball-strip" id="balls-0"></div>
+        </article>
+
+        <div class="score-vs">
+          <span class="vs-mark">VS</span>
+          <em id="turn-label">你的回合</em>
+        </div>
+
+        <article class="player-card right" id="player-card-1">
+          <div class="ball-strip" id="balls-1"></div>
+          <div class="player-meta">
+            <span class="player-name" id="player-name-1">机器人</span>
+            <span class="player-group" id="player-group-1">球组待定</span>
+          </div>
+          <div class="avatar" id="avatar-1">AI</div>
+        </article>
+      </div>
+
+      <div class="hud-tools">
+        <button class="icon-btn" id="btn-guide" title="辅助线 (G)" aria-label="切换辅助线">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20 20 4M4 20h6M4 20v-6" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/><circle cx="15.5" cy="8.5" r="2.4" fill="none" stroke="currentColor" stroke-width="1.2"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-sound" title="声音 (M)" aria-label="切换声音">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9v6h4l5 4V5L8 9H4Z" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/><path id="sound-waves" d="M16 9.5c1.2 1.4 1.2 3.6 0 5M18.5 7c2.4 2.8 2.4 7.2 0 10" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-fullscreen" title="全屏 (F)" aria-label="切换全屏">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H4v5M15 4h5v5M9 20H4v-5M15 20h5v-5" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="icon-btn" id="btn-pause" title="暂停 (Esc)" aria-label="暂停">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14M16 5v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="hud-level" id="hud-level">
+      <svg class="ico ico-sm" aria-hidden="true"><use href="#i-target"/></svg>
+      <span class="hud-level-label">关卡</span>
+      <strong id="hud-level-name">第一杆</strong>
+      <span class="hud-level-divider"></span>
+      <span id="hud-level-shots">剩余 6 杆</span>
+      <span class="hud-level-goal" id="hud-level-goal"></span>
+      <span class="hud-level-rules" id="hud-level-rules"></span>
+    </div>
+
+    <!-- 右侧控件带：击球点 → 竖向力度条 → 出杆（PC 与手机共用一套 DOM 与状态） -->
+    <aside class="hud-side-right" id="hud-side-right">
+      <button class="spin-orb" id="btn-spin" type="button" title="击球点 (S)" aria-label="击球点">
+        <span class="spin-orb-ring"></span>
+        <span class="spin-orb-cross h"></span>
+        <span class="spin-orb-cross v"></span>
+        <span class="spin-orb-dot" id="spin-orb-dot"></span>
+      </button>
+      <span class="spin-orb-label">击球点</span>
+
+      <div class="power-block" id="power-block">
+        <div class="power-head"><span>力度</span><span id="power-value">0%</span></div>
+        <div class="power-track" id="power-track">
+          <div class="power-fill" id="power-fill"></div>
+          <div class="power-marker" id="power-marker"></div>
+          <div class="power-ticks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+          <div class="power-arrow" id="power-arrow" aria-hidden="true"></div>
+          <span class="power-number" id="power-number"></span>
+          <div class="power-cue-skin" id="power-cue-skin" aria-hidden="true"></div>
+        </div>
+        <div class="power-hint" id="power-hint">从上往下拖 · 松手出杆</div>
+      </div>
+      <div class="action-block" id="action-block">
+        <button class="ghost-btn compact" id="btn-shot" title="出杆（蓄力后松开）">出杆</button>
+        <button class="ghost-btn touch-shoot" id="btn-touch-shoot" type="button" aria-label="按住蓄力，松开出杆">
+          <span class="touch-shoot-glow" aria-hidden="true"></span>
+          <span class="touch-shoot-copy"><strong>蓄力出杆</strong><em>按住蓄力 · 松开击球</em></span>
+        </button>
+      </div>
+      <span class="band-cap" aria-hidden="true"><svg class="ico"><use href="#i-cue"/></svg></span>
+    </aside>
+
+    <!-- 底部：当前球杆 + 横向角度刻度尺 + 金币 -->
+    <div class="hud-bottom">
+      <div class="cue-card" id="cue-card">
+        <div class="cue-thumb" id="cue-thumb" aria-hidden="true">
+          <span class="cue-thumb-shaft"></span><span class="cue-thumb-butt"></span><span class="cue-thumb-ring"></span>
+        </div>
+        <div class="cue-card-text">
+          <span class="cue-card-label">当前球杆</span>
+          <strong id="cue-name">经典橡木</strong>
+          <span class="cue-card-stats" id="cue-stats">力量 100 · 旋转 100</span>
+        </div>
+      </div>
+
+      <div class="angle-wrap">
+        <div class="angle-strip" id="angle-strip" aria-hidden="true">
+          <span class="angle-strip-ticks"></span>
+          <span class="angle-strip-cursor" id="angle-strip-cursor"></span>
+        </div>
+        <div class="angle-block" id="angle-block" role="group" aria-label="角度微调">
+          <svg class="ico ico-sm angle-ico" aria-hidden="true"><use href="#i-angle"/></svg>
+          <span class="angle-label">角度</span>
+          <button type="button" class="angle-step big" data-angle-step="-0.5" aria-label="逆时针微调 0.5 度" title="逆时针 0.5°">−0.5°</button>
+          <button type="button" class="angle-step" data-angle-step="-0.05" aria-label="逆时针精调 0.05 度" title="逆时针 0.05°">−0.05°</button>
+          <span class="angle-ruler" aria-hidden="true"><i></i></span>
+          <button type="button" class="angle-step" data-angle-step="+0.05" aria-label="顺时针精调 0.05 度" title="顺时针 0.05°">+0.05°</button>
+          <button type="button" class="angle-step big" data-angle-step="+0.5" aria-label="顺时针微调 0.5 度" title="顺时针 0.5°">+0.5°</button>
+          <span class="angle-readout" id="angle-readout" aria-hidden="true"></span>
+        </div>
+      </div>
+
+      <div class="hud-coins" id="hud-coins" title="金币：对局胜负与闯关获得，可在球杆商店兑换球杆">
+        <svg class="ico" aria-hidden="true"><use href="#i-coin"/></svg>
+        <b id="hud-coins-value">0</b>
+      </div>
+    </div>
+
+    <div class="spin-widget" id="spin-widget">
+      <div class="spin-head"><span>击球点</span><button id="spin-close" aria-label="关闭">×</button></div>
+      <div class="spin-ball" id="spin-ball">
+        <span class="spin-ring"></span>
+        <span class="spin-cross h"></span>
+        <span class="spin-cross v"></span>
+        <span class="spin-center"></span>
+        <span class="spin-dot" id="spin-dot"></span>
+      </div>
+      <div class="spin-values"><span id="spin-label-x">中杆</span><span id="spin-label-y">无旋转</span></div>
+      <div class="spin-presets" id="spin-presets" role="group" aria-label="击球点预设">
+        <button type="button" data-spin-x="-0.5" data-spin-y="0.5" title="高杆左塞：先向前跟进，吃库后向左折出">高杆左塞</button>
+        <button type="button" data-spin-x="0" data-spin-y="0.7" title="高杆：强烈前旋，撞击后持续跟进">高杆</button>
+        <button type="button" data-spin-x="0.5" data-spin-y="0.5" title="高杆右塞：先跟进，吃库后向右折出（偷塞）">高杆右塞</button>
+        <button type="button" data-spin-x="-0.7" data-spin-y="0" title="左塞：吃库后向左改变反弹角">左塞</button>
+        <button type="button" data-spin-x="0" data-spin-y="0" class="active" title="中杆：出杆无自转，短距离定杆">中杆</button>
+        <button type="button" data-spin-x="0.7" data-spin-y="0" title="右塞：吃库后向右改变反弹角">右塞</button>
+        <button type="button" data-spin-x="-0.5" data-spin-y="-0.5" title="低杆左塞：先回缩，吃库后叠加左塞偏移">低杆左塞</button>
+        <button type="button" data-spin-x="0" data-spin-y="-0.7" title="低杆（后斯登）：强烈后旋，撞击后回缩">低杆</button>
+        <button type="button" data-spin-x="0.5" data-spin-y="-0.5" title="低杆右塞：先回缩，吃库后叠加右塞偏移">低杆右塞</button>
+        <button type="button" data-spin-x="0" data-spin-y="0.35" title="中高杆：微弱前旋，轻微前冲，容错率最高">中高杆</button>
+        <button type="button" data-spin-x="0" data-spin-y="-0.35" title="中低杆：微弱后旋，小幅回缩，过渡柔和">中低杆</button>
+      </div>
+      <p class="spin-desc" id="spin-desc">中杆 · 定杆：出杆无自转，先滑动后自然滚动；短距离撞击后基本停在原地，分离角接近 90°。</p>
+      <div class="spin-hint">调整时瞄准已锁定 · 按 L 解锁 · 按 Space 出杆</div>
+    </div>
+
+    <div class="hint-bar" id="hint-bar"><span class="hint-dot"></span><span id="hint-text">移动鼠标瞄准 · 按住左键蓄力 · 松开击球</span></div>
+    <div class="toast" id="toast"></div>
+    <div class="turn-flash" id="turn-flash"></div>
+  </section>
+
+  <div id="screens">
+    <section class="screen menu-screen active" id="screen-menu">
+      <div class="menu-glow" aria-hidden="true"></div>
+      <div class="menu-inner">
+        <div class="menu-main">
+          <div class="eyebrow"><span class="eyebrow-line"></span>真实物理 · 职业球台 · 单人 / 双人</div>
+          <h1 class="game-title"><span>即刻</span>开球</h1>
+          <div class="title-en">P R O &nbsp; P O O L</div>
+          <div class="deco-rule" aria-hidden="true"><i></i></div>
+          <p class="tagline">每一次出杆，都值得被计算。<br>真实摩擦、旋转与碰撞，还原一张职业球台的手感。</p>
+
+          <div class="menu-actions">
+            <button class="menu-btn primary" data-action="solo">
+              <span class="menu-btn-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="9" r="3" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M3.8 19c.4-3.2 2.4-5 5.2-5s4.8 1.8 5.2 5" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/><circle cx="17.5" cy="15" r="2.2" fill="none" stroke="currentColor" stroke-width="1.2"/><path d="M14.2 21c.3-2.1 1.6-3.3 3.3-3.3s3 1.2 3.3 3.3" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              </span>
+              <span class="menu-btn-copy"><strong>单人挑战</strong><em>与机器人展开一局八球对决</em></span>
+              <span class="menu-btn-arrow">→</span>
+            </button>
+            <button class="menu-btn" data-action="pvp">
+              <span class="menu-btn-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="7" cy="8" r="2.6" fill="none" stroke="currentColor" stroke-width="1.3"/><circle cx="17" cy="8" r="2.6" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M2.8 19c.3-2.8 1.8-4.4 4.2-4.4s3.9 1.6 4.2 4.4M12.8 19c.3-2.8 1.8-4.4 4.2-4.4s3.9 1.6 4.2 4.4" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+              </span>
+              <span class="menu-btn-copy"><strong>双人对战</strong><em>同一台电脑，轮流上手</em></span>
+              <span class="menu-btn-arrow">→</span>
+            </button>
+            <button class="menu-btn" data-action="levels">
+              <span class="menu-btn-icon">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1L3.2 9.5l6.1-.9L12 3Z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
+              </span>
+              <span class="menu-btn-copy"><strong>关卡模式</strong><em>破解球局，赢取金币与奖励球杆</em></span>
+              <span class="menu-btn-arrow">→</span>
+            </button>
+          </div>
+
+          <div class="menu-sub-actions">
+            <button data-action="shop"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-shop"/></svg>球杆商店</button>
+            <button data-action="help"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-help"/></svg>操作说明</button>
+            <button data-action="fullscreen"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-expand"/></svg>全屏模式</button>
+          </div>
+
+          <div class="menu-wallet">
+            <span class="wallet-item"><svg class="ico" aria-hidden="true"><use href="#i-coin"/></svg><strong id="menu-coins">0</strong></span>
+            <span class="wallet-item"><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg><strong id="menu-stars">0</strong></span>
+            <span class="wallet-sep"></span>
+            <span class="wallet-cue">当前球杆 · <strong id="menu-cue-name">经典橡木</strong></span>
+          </div>
+        </div>
+
+        <aside class="menu-aside">
+          <div class="showcase-card">
+            <div class="showcase-top"><svg class="ico ico-sm" aria-hidden="true"><use href="#i-diamond"/></svg><span>当前球杆</span><em id="showcase-tier">经典</em></div>
+            <div class="showcase-cue" id="showcase-cue">
+              <div class="showcase-cue-body"></div>
+              <div class="showcase-cue-shadow"></div>
+            </div>
+            <div class="showcase-name" id="showcase-name">经典橡木</div>
+            <div class="showcase-en" id="showcase-en">CLASSIC OAK</div>
+            <div class="showcase-stats">
+              <div><span>力量</span><b id="showcase-power">100</b><i><em style="width:100%"></em></i></div>
+              <div><span>旋转</span><b id="showcase-spin">100</b><i><em style="width:100%"></em></i></div>
+              <div><span>辅助线</span><b id="showcase-aim">100</b><i><em style="width:100%"></em></i></div>
+            </div>
+            <button class="showcase-edit" data-action="shop">更换球杆</button>
+          </div>
+          <div class="menu-record">
+            <div><span>个人纪录</span><strong id="menu-record-text">尚未开杆</strong></div>
+            <div class="record-stars" id="menu-record-stars"></div>
+          </div>
+        </aside>
+      </div>
+      <div class="menu-foot">© PRO POOL · 所有物理与画面均实时演算 · 建议使用 Chrome / Edge 全屏体验</div>
+    </section>
+
+    <section class="screen modal-screen" id="screen-difficulty">
+      <div class="modal">
+        <button class="modal-close" data-action="close">×</button>
+        <span class="modal-kicker">SINGLE MATCH</span>
+        <h2>选择对手强度</h2>
+        <p class="modal-sub">机器人会观察球路、计算走位。难度越高，失误越少。</p>
+        <div class="difficulty-list" id="difficulty-list">
+          <button class="difficulty-card" data-difficulty="easy">
+            <span class="difficulty-badge">入门</span>
+            <strong>球房新手</strong>
+            <em>瞄准有误差，偶尔会打丢简单球。适合熟悉手感。</em>
+            <span class="difficulty-bars"><i class="on"></i><i></i><i></i></span>
+          </button>
+          <button class="difficulty-card selected" data-difficulty="normal">
+            <span class="difficulty-badge">标准</span>
+            <strong>职业陪练</strong>
+            <em>稳定的进球率与基本走位，会抓住明显机会。</em>
+            <span class="difficulty-bars"><i class="on"></i><i class="on"></i><i></i></span>
+          </button>
+          <button class="difficulty-card" data-difficulty="hard">
+            <span class="difficulty-badge">大师</span>
+            <strong>黑八高手</strong>
+            <em>精准计算角度与分离角，擅长连续得分。</em>
+            <span class="difficulty-bars"><i class="on"></i><i class="on"></i><i class="on"></i></span>
+          </button>
+        </div>
+        <div class="modal-actions">
+          <button class="btn-ghost" data-action="close">返回</button>
+          <button class="btn-primary" id="btn-start-solo">开始对局 <span>→</span></button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen page-screen" id="screen-levels">
+      <div class="page-head">
+        <button class="back-btn" data-action="back">←</button>
+        <div><span class="page-kicker">关卡挑战</span><h2>关卡模式</h2></div>
+        <div class="page-wallet"><span class="coin-chip"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.2" fill="none" stroke="currentColor" stroke-width="1.3"/><path d="M12 7.2v9.6M9.7 9.4h3.7a1.9 1.9 0 0 1 0 3.8h-2.8a1.9 1.9 0 0 0 0 3.8h3.9" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg><b id="levels-coins">0</b></span></div>
+      </div>
+      <p class="page-lead">每一关都是一局精心摆放的球局。用最少的杆数清台，赢得星星与金币，解锁更高级的球杆。</p>
+      <div class="level-grid" id="level-grid"></div>
+    </section>
+
+    <section class="screen page-screen" id="screen-shop">
+      <div class="page-head">
+        <button class="back-btn" data-action="back">←</button>
+        <div><span class="page-kicker">球杆收藏</span><h2>球杆商店</h2></div>
+        <div class="page-wallet"><span class="coin-chip"><svg class="ico" aria-hidden="true"><use href="#i-coin"/></svg><b id="shop-coins">0</b></span></div>
+      </div>
+      <p class="page-lead">通关获得金币；星星达到门槛后，方可购买对应球杆。部分球杆为关卡首通奖励，也可用金币提前购买。</p>
+      <div class="shop-grid" id="shop-grid"></div>
+    </section>
+
+    <section class="screen page-screen" id="screen-help">
+      <div class="page-head">
+        <button class="back-btn" data-action="back">←</button>
+        <div><span class="page-kicker">玩法</span><h2>操作说明</h2></div>
+      </div>
+      <div class="help-grid">
+        <article class="help-card">
+          <span class="help-index">01</span>
+          <h3>瞄准与角度尺</h3>
+          <p>移动鼠标或拖动球桌改变出杆方向。瞄准接近合法进球线时，袋口会轻微“吸住”辅助线，方便找正；底部角度尺可用 <strong>−0.8° / −0.15° / +0.15° / +0.8°</strong> 微调；键盘 <kbd>←</kbd> <kbd>→</kbd> 为 0.02°，配合 <kbd>Shift</kbd> 细至 0.004°；按住 <kbd>Shift</kbd> 移动鼠标可进入精细瞄准。</p>
+        </article>
+        <article class="help-card">
+          <span class="help-index">02</span>
+          <h3>蓄力与出杆</h3>
+          <p>桌面：在球桌上按住鼠标左键蓄力，<strong>松开左键</strong>出杆。触屏：按住底部「蓄力出杆」，<strong>松手</strong>即击球。短按轻推，长按全力。</p>
+        </article>
+        <article class="help-card">
+          <span class="help-index">03</span>
+          <h3>击球点与预设</h3>
+          <p>点击「击球点」、右键球台或按 <kbd>S</kbd> 打开面板；面板打开时瞄准会自动锁定，移动鼠标调整击球点不会改变出杆方向，按 <kbd>L</kbd> 可解锁。11 个击球点预设：<strong>中杆 / 高杆 / 中高杆 / 中低杆 / 低杆 / 左塞 / 右塞 / 高杆左塞 / 高杆右塞 / 低杆左塞 / 低杆右塞</strong>；也可以直接点选、拖动红点微调，双击复位。面板下方会说明当前击球点的走位效果。</p>
+        </article>
+        <article class="help-card">
+          <span class="help-index">04</span>
+          <h3>规则 · 八球</h3>
+          <p>开球后打进第一颗球决定球组。清空本方球组后打进黑八获胜。母球落袋、空杆或先碰对方球均犯规，对手获得自由球。</p>
+        </article>
+        <article class="help-card">
+          <span class="help-index">05</span>
+          <h3>自由球</h3>
+          <p>犯规后可将母球放置在台面任意合法位置。桌面移动鼠标预览、点击确认；触屏直接点击球桌摆放母球。</p>
+        </article>
+        <article class="help-card">
+          <span class="help-index">06</span>
+          <h3>快捷键</h3>
+          <p><kbd>G</kbd> 辅助线 · <kbd>S</kbd> 击球点 · <kbd>L</kbd> 锁定/解锁瞄准 · <kbd>Space</kbd> 蓄力出杆 · <kbd>M</kbd> 声音 · <kbd>Esc</kbd> 暂停 · <kbd>F</kbd> 全屏。触屏设备无需快捷键，全部操作均在底部控制区。</p>
+        </article>
+        <article class="help-card">
+          <span class="help-index">07</span>
+          <h3>手机与触屏</h3>
+          <p>手机建议横屏游玩。竖屏进入球局时会显示横屏引导，点击「横屏进入」；横屏下球台占满画面，底部为紧凑操控区，瞄准时在球桌上拖动即可。</p>
+        </article>
+        <article class="help-card">
+          <span class="help-index">08</span>
+          <h3>击球点说明</h3>
+          <p>高杆撞击后母球跟进，低杆撞击后回缩；左右塞用于改变碰库后的反弹角度。组合使用可在进球的同时把母球送到下一杆的位置。</p>
+        </article>
+        <article class="help-card">
+          <span class="help-index">09</span>
+          <h3>异形球杆</h3>
+          <p>远投钓竿、裁决之枪、星辉魔杖、果岭推杆各有自己的出杆力量、旋转和辅助线强度。球杆的“辅助线”越高，袋口黏滞窗口越大，越容易把球送到袋口。</p>
+        </article>
+        <p class="help-credit">击球 / 碰撞 / 落袋采样：Directory.Audio（Creative Commons）；其余音效与视觉为本项目自制。</p>
+      </div>
+    </section>
+
+    <section class="screen modal-screen" id="screen-pause">
+      <div class="modal narrow">
+        <span class="modal-kicker">PAUSED</span>
+        <h2>暂停</h2>
+        <p class="modal-sub">球局已暂停。调整一下呼吸，再继续。</p>
+        <div class="modal-actions vertical">
+          <button class="btn-primary" data-action="resume">继续球局</button>
+          <button class="btn-ghost" data-action="restart">重新开始</button>
+          <button class="btn-ghost" data-action="quit">返回主菜单</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="screen modal-screen" id="screen-result">
+      <div class="modal result-modal">
+        <div class="result-glow" aria-hidden="true"></div>
+        <span class="modal-kicker" id="result-kicker">MATCH COMPLETE</span>
+        <h2 id="result-title">漂亮的一局</h2>
+        <p class="modal-sub" id="result-sub">你赢下了这局八球对决。</p>
+        <div class="result-stars" id="result-stars"></div>
+        <div class="result-stats" id="result-stats"></div>
+        <div class="result-reward hidden" id="result-reward">
+          <span>首次通关奖励</span>
+          <strong><svg class="ico" aria-hidden="true"><use href="#i-coin"/></svg><b id="result-coins">0</b></strong>
+        </div>
+        <div class="modal-actions" id="result-actions"></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- 启动失败回显：初始化异常时显示可读错误，而不是黑屏 -->
+  <div class="boot-error" id="boot-error" role="alert" aria-live="assertive"></div>
+</div>
+
+<script src="js/config.js"></script>
+<script src="js/physics.js"></script>
+<script src="js/renderer.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/ai.js"></script>
+<script src="js/levels.js"></script>
+<script src="js/game.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

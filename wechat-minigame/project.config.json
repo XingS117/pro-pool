@@ -1,0 +1,14 @@
+{
+  "description": "即刻开球 PRO POOL 微信小游戏",
+  "appid": "touristappid",
+  "projectname": "pro-pool",
+  "compileType": "game",
+  "libVersion": "3.4.0",
+  "setting": {
+    "es6": true,
+    "postcss": false,
+    "minified": false,
+    "urlCheck": false
+  },
+  "condition": {}
+}
