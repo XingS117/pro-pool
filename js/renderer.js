@@ -201,12 +201,65 @@
    * 程序化纹理：台呢（离屏 canvas 生成一次）
    *   - 交织纤维 + 高频噪点 + 低频色斑（低频用周期函数保证无缝平铺）
    * ------------------------------------------------------------------------*/
+  // 台呢纹理的纯绘制降级实现：不使用 ImageData，适用于不支持像素级 API 的宿主
+  function makeClothTextureByDrawing(S, cv, g) {
+    var base = g.createLinearGradient(0, 0, S, S);
+    base.addColorStop(0, '#2c7a45');
+    base.addColorStop(0.5, '#357f4b');
+    base.addColorStop(1, '#2a7342');
+    g.fillStyle = base;
+    g.fillRect(0, 0, S, S);
+    // 低频色斑
+    var rng = makeRng(20261107);
+    g.globalAlpha = 0.05;
+    for (var k = 0; k < 26; k++) {
+      var bx = rng() * S, by = rng() * S, br = 40 + rng() * 110;
+      var rg = g.createRadialGradient(bx, by, 0, bx, by, br);
+      rg.addColorStop(0, rng() > 0.5 ? '#6fb56f' : '#1f5c36');
+      rg.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = rg;
+      g.beginPath();
+      g.arc(bx, by, br, 0, TAU);
+      g.fill();
+    }
+    // 经纬交织网格
+    g.globalAlpha = 0.10;
+    g.strokeStyle = '#8ec98a';
+    g.lineWidth = 1;
+    for (var x2 = 0; x2 < S; x2 += 4) {
+      g.beginPath(); g.moveTo(x2 + 0.5, 0); g.lineTo(x2 + 0.5, S); g.stroke();
+    }
+    g.globalAlpha = 0.07;
+    g.strokeStyle = '#143c25';
+    for (var y2 = 0; y2 < S; y2 += 4) {
+      g.beginPath(); g.moveTo(0, y2 + 0.5); g.lineTo(S, y2 + 0.5); g.stroke();
+    }
+    // 高频噪点
+    g.globalAlpha = 0.055;
+    g.fillStyle = '#cfeacb';
+    for (var n = 0; n < 2600; n++) {
+      var nx = rng() * S, ny = rng() * S;
+      g.fillRect(nx, ny, 1, 1);
+    }
+    g.globalAlpha = 1;
+    return cv;
+  }
+
   function makeClothTexture() {
     var S = 512;
     var cv = makeCanvas(S, S);
     var g = cv.getContext('2d');
-    var img = g.createImageData(S, S);
-    var data = img.data;
+    // ImageData 逐像素路径在部分宿主（如微信小游戏主线程 2D Canvas）不可用，
+    // 此时退化为纯绘制路径：底色 + 经纬交织网格 + 低频色斑 + 噪点，
+    // 视觉接近且不依赖像素级 API。
+    var img = null, data = null;
+    try {
+      if (typeof g.createImageData === 'function') {
+        img = g.createImageData(S, S);
+        data = img && img.data;
+      }
+    } catch (e) { img = null; data = null; }
+    if (!data) return makeClothTextureByDrawing(S, cv, g);
     var i, x, y, px, py;
     for (y = 0; y < S; y++) {
       py = y / S;

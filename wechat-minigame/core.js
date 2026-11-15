@@ -1669,12 +1669,65 @@
    * 程序化纹理：台呢（离屏 canvas 生成一次）
    *   - 交织纤维 + 高频噪点 + 低频色斑（低频用周期函数保证无缝平铺）
    * ------------------------------------------------------------------------*/
+  // 台呢纹理的纯绘制降级实现：不使用 ImageData，适用于不支持像素级 API 的宿主
+  function makeClothTextureByDrawing(S, cv, g) {
+    var base = g.createLinearGradient(0, 0, S, S);
+    base.addColorStop(0, '#2c7a45');
+    base.addColorStop(0.5, '#357f4b');
+    base.addColorStop(1, '#2a7342');
+    g.fillStyle = base;
+    g.fillRect(0, 0, S, S);
+    // 低频色斑
+    var rng = makeRng(20261107);
+    g.globalAlpha = 0.05;
+    for (var k = 0; k < 26; k++) {
+      var bx = rng() * S, by = rng() * S, br = 40 + rng() * 110;
+      var rg = g.createRadialGradient(bx, by, 0, bx, by, br);
+      rg.addColorStop(0, rng() > 0.5 ? '#6fb56f' : '#1f5c36');
+      rg.addColorStop(1, 'rgba(0,0,0,0)');
+      g.fillStyle = rg;
+      g.beginPath();
+      g.arc(bx, by, br, 0, TAU);
+      g.fill();
+    }
+    // 经纬交织网格
+    g.globalAlpha = 0.10;
+    g.strokeStyle = '#8ec98a';
+    g.lineWidth = 1;
+    for (var x2 = 0; x2 < S; x2 += 4) {
+      g.beginPath(); g.moveTo(x2 + 0.5, 0); g.lineTo(x2 + 0.5, S); g.stroke();
+    }
+    g.globalAlpha = 0.07;
+    g.strokeStyle = '#143c25';
+    for (var y2 = 0; y2 < S; y2 += 4) {
+      g.beginPath(); g.moveTo(0, y2 + 0.5); g.lineTo(S, y2 + 0.5); g.stroke();
+    }
+    // 高频噪点
+    g.globalAlpha = 0.055;
+    g.fillStyle = '#cfeacb';
+    for (var n = 0; n < 2600; n++) {
+      var nx = rng() * S, ny = rng() * S;
+      g.fillRect(nx, ny, 1, 1);
+    }
+    g.globalAlpha = 1;
+    return cv;
+  }
+
   function makeClothTexture() {
     var S = 512;
     var cv = makeCanvas(S, S);
     var g = cv.getContext('2d');
-    var img = g.createImageData(S, S);
-    var data = img.data;
+    // ImageData 逐像素路径在部分宿主（如微信小游戏主线程 2D Canvas）不可用，
+    // 此时退化为纯绘制路径：底色 + 经纬交织网格 + 低频色斑 + 噪点，
+    // 视觉接近且不依赖像素级 API。
+    var img = null, data = null;
+    try {
+      if (typeof g.createImageData === 'function') {
+        img = g.createImageData(S, S);
+        data = img && img.data;
+      }
+    } catch (e) { img = null; data = null; }
+    if (!data) return makeClothTextureByDrawing(S, cv, g);
     var i, x, y, px, py;
     for (y = 0; y < S; y++) {
       py = y / S;
@@ -4093,7 +4146,7 @@
     var cx = sizeDev / 2, cy = sizeDev / 2;
     var base = color || '#f4eddc';
     // 小球（手机 13~16px）不能用大球的强高光：白心会盖掉颜色，
-    // 整颗球看起来是"发白的糖"，与《台球冠军》那种饱和实色球完全不像。
+    // 整颗球看起来会像"发白的糖"，与真实台球那种饱和实色球完全不像。
     var small = r < 14;
     var h0 = small ? 0.24 : 0.70;
     var h1 = small ? 0.10 : 0.34;
@@ -4514,7 +4567,7 @@
   Renderer.prototype._drawFlatNumber = function (ctx, cx, cy, r, number) {
     // 白圈只占球径 60%：球本身的颜色必须一眼看得出来（上一版白圈占到 86%，
     // 球被吃成一个"白色号码牌"，这是被批评的核心）。
-    // 参照《台球冠军》：号码只是球面上一块小圆（约球径 38~42%），
+    // 真实台球的号码只是球面上一块小圆（约球径 38~42%），
     // 旧版 52% + 粗黑大字把球色吃光了，看起来像"号码筹码"。
     var smallBall = r < 11;
     var dr = Math.max(2.6, r * (smallBall ? 0.35 : 0.50));
@@ -7396,7 +7449,7 @@
  * 坐标单位米，原点在台呢左上角，x 向右 (2.54)，y 向下 (1.27)。
  * Pool.LEVELS = [ ... ]，完整摆球（不含母球）。
  *
- * 关卡机制（参考《台球冠军》练习关）：
+ * 关卡机制（练习型关卡设计）：
  *   targets [] 本关必须打进的目标球号码（全色低号球 1..7）；
  *   blockers [] 干扰球号码（花色球 9..15），不能打进，进袋判失败；
  *   balls [] = targets + blockers 的完整摆球，供 physics/game 建世界。
