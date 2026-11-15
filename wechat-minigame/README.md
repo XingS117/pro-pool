@@ -9,6 +9,13 @@
    注意：正式提审前必须换成正式 AppID，否则无法绑定软著与备案。
 4. 编译即可在模拟器/真机预览。
 
+## 宿主兼容要点（已验证）
+
+- 主线程 2D Canvas 不支持 `ctx.createImageData`：台呢纹理改为「优先 ImageData、不可用则纯绘制降级」。
+- canvas 无 DOM 盒模型：适配层注入 `getBoundingClientRect`。
+- 无 `document.body.classList` / `window.matchMedia` / `atob` / `localStorage` / `rAF`：适配层逐一补齐。
+- 回归保障：`node tests/mg_runtime.test.js` 在 Node 中模拟 wx 运行时，13 项断言覆盖启动、映射、分享与触摸响应。
+
 ## 重新生成核心 bundle
 修改网页版 js/ 后执行：node scripts/build-minigame.mjs（拼接 config/physics/renderer/audio/ai/levels/game，不含 DOM 主程序 main.js）。
 
