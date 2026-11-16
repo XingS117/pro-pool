@@ -1,7 +1,7 @@
 {
-  "description": "一杆入袋 PRO POOL 微信小游戏",
+  "description": "一杆入袋 · 真实物理八球台球（微信小游戏）",
   "appid": "wxc7a231a0939ab1ea",
-  "projectname": "pro-pool",
+  "projectname": "一杆入袋",
   "compileType": "game",
   "libVersion": "3.4.0",
   "setting": {
@@ -32,11 +32,26 @@
   "simulatorPluginLibVersion": {},
   "packOptions": {
     "ignore": [
-      { "type": "file", "value": "README.md" },
-      { "type": "file", "value": "元数据.md" },
-      { "type": "file", "value": "上线进度.md" },
-      { "type": "file", "value": "icon-512.png" },
-      { "type": "folder", "value": "scripts" }
+      {
+        "type": "file",
+        "value": "README.md"
+      },
+      {
+        "type": "file",
+        "value": "元数据.md"
+      },
+      {
+        "type": "file",
+        "value": "上线进度.md"
+      },
+      {
+        "type": "file",
+        "value": "icon-512.png"
+      },
+      {
+        "type": "folder",
+        "value": "scripts"
+      }
     ],
     "include": []
   },
