@@ -1,4 +1,4 @@
-/* 即刻开球 — 全局配置（Lead 维护）
+/* 一杆入袋 — 全局配置（Lead 维护）
  *
  * 明文依赖表（单文件内分层，改动前先看这里）：
  *   config.js  ── 无依赖，提供 CONFIG / BALL_COLORS / UTIL

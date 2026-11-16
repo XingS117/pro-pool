@@ -1,5 +1,4 @@
-# PRO POOL · 即刻开球
-
+# 一杆入袋 · PRO POOL
 [![Play Online](https://img.shields.io/badge/▶_Play_Online-xingshuwen.com-2ea44f?style=for-the-badge)](https://xingshuwen.com/games/pool/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Tests](https://img.shields.io/badge/tests-30_suites-success)](#testing)

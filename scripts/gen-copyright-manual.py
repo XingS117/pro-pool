@@ -6,7 +6,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "软著申请"
 OUT.mkdir(parents=True, exist_ok=True)
-FULL = "即刻开球台球游戏软件"
+FULL = "一杆入袋台球游戏软件"
 VER = "V1.0"
 CN = "C:/Windows/Fonts/msyh.ttc"
 CNB = "C:/Windows/Fonts/msyhbd.ttc"

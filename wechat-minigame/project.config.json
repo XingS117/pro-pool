@@ -1,5 +1,5 @@
 {
-  "description": "即刻开球 PRO POOL 微信小游戏",
+  "description": "一杆入袋 PRO POOL 微信小游戏",
   "appid": "wxc7a231a0939ab1ea",
   "projectname": "pro-pool",
   "compileType": "game",
@@ -9,7 +9,37 @@
     "postcss": false,
     "minified": false,
     "urlCheck": false,
-    "ignoreDevUnusedFiles": true
+    "ignoreDevUnusedFiles": true,
+    "compileWorklet": false,
+    "uglifyFileName": false,
+    "uploadWithSourceMap": true,
+    "enhance": false,
+    "packNpmManually": false,
+    "packNpmRelationList": [],
+    "minifyWXSS": true,
+    "minifyWXML": true,
+    "localPlugins": false,
+    "disableUseStrict": false,
+    "useCompilerPlugins": false,
+    "condition": false,
+    "babelSetting": {
+      "ignore": [],
+      "disablePlugins": [],
+      "outputPath": ""
+    }
   },
-  "condition": {}
+  "condition": {},
+  "simulatorPluginLibVersion": {},
+  "packOptions": {
+    "ignore": [
+      { "type": "file", "value": "README.md" },
+      { "type": "file", "value": "元数据.md" },
+      { "type": "file", "value": "上线进度.md" },
+      { "type": "file", "value": "icon-512.png" },
+      { "type": "folder", "value": "scripts" }
+    ],
+    "include": []
+  },
+  "isGameTourist": false,
+  "editorSetting": {}
 }

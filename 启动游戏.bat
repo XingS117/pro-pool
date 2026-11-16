@@ -1,6 +1,6 @@
 @echo off
 chcp 65001 >nul
-title 即刻开球 · PRO POOL
+title 一杆入袋 · PRO POOL
 cd /d "%~dp0"
 if exist "index.html" (
   start "" "index.html"

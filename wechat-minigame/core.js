@@ -1,5 +1,5 @@
 /* PRO POOL core bundle (auto-generated, do not edit) */
-/* 即刻开球 — 全局配置（Lead 维护）
+/* 一杆入袋 — 全局配置（Lead 维护）
  *
  * 明文依赖表（单文件内分层，改动前先看这里）：
  *   config.js  ── 无依赖，提供 CONFIG / BALL_COLORS / UTIL
@@ -194,7 +194,7 @@
   };
 })();
 /* ============================================================
- * 即刻开球 / PRO POOL — 物理引擎 js/physics.js
+ * 一杆入袋 / PRO POOL — 物理引擎 js/physics.js
  * ------------------------------------------------------------
  * 经典 script（非 ES module），挂载 window.Pool.Physics.PhysicsWorld。
  * 纯 JS、无外部依赖；Node 环境（无 window）可直接 require/vm 加载，
@@ -1467,7 +1467,7 @@
 });
 
 /* ============================================================================
- * 即刻开球 / PRO POOL — Canvas 渲染器
+ * 一杆入袋 / PRO POOL — Canvas 渲染器
  * 文件：js/renderer.js   负责人：visuals-dev
  *
  * 经典 script（非 ES module），挂载 window.Pool.Renderer。
@@ -5611,7 +5611,7 @@
   Pool.Renderer.VERSION = '1.0.0';
 })();
 
-/* 即刻开球 — 程序化音频（WebAudio，无外部素材） */
+/* 一杆入袋 — 程序化音频（WebAudio，无外部素材） */
 (function () {
   var Pool = (window.Pool = window.Pool || {});
 
@@ -6092,7 +6092,7 @@
   Pool.Audio = AudioEngine;
 })();
 
-/* 即刻开球 / PRO POOL — 机器人决策 AI（ai-levels-dev）
+/* 一杆入袋 / PRO POOL — 机器人决策 AI（ai-levels-dev）
  * 对外接口：Pool.AI.chooseShot(world, opts)
  * 约束：绝不修改传入 world；所有候选通过 world.clone() 试打验证。
  */
@@ -7445,7 +7445,7 @@
     difficulty: DIFFICULTY
   };
 })();
-/* 即刻开球 / PRO POOL — 关卡数据（ai-levels-dev 维护）
+/* 一杆入袋 / PRO POOL — 关卡数据（ai-levels-dev 维护）
  * 坐标单位米，原点在台呢左上角，x 向右 (2.54)，y 向下 (1.27)。
  * Pool.LEVELS = [ ... ]，完整摆球（不含母球）。
  *
@@ -7824,7 +7824,7 @@
     }
   ];
 })();
-/* 即刻开球 — 游戏流程 / 八球规则 / 关卡 / 存档（Lead 维护） */
+/* 一杆入袋 — 游戏流程 / 八球规则 / 关卡 / 存档（Lead 维护） */
 (function () {
   var Pool = (window.Pool = window.Pool || {});
   var U = Pool.UTIL;

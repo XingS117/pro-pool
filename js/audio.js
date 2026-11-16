@@ -1,4 +1,4 @@
-/* 即刻开球 — 程序化音频（WebAudio，无外部素材） */
+/* 一杆入袋 — 程序化音频（WebAudio，无外部素材） */
 (function () {
   var Pool = (window.Pool = window.Pool || {});
 

@@ -1,5 +1,5 @@
 /* ============================================================
- * 即刻开球 / PRO POOL — 物理引擎 js/physics.js
+ * 一杆入袋 / PRO POOL — 物理引擎 js/physics.js
  * ------------------------------------------------------------
  * 经典 script（非 ES module），挂载 window.Pool.Physics.PhysicsWorld。
  * 纯 JS、无外部依赖；Node 环境（无 window）可直接 require/vm 加载，

@@ -1,4 +1,4 @@
-/* 即刻开球 — 入口 / UI 装配 / 输入 / 循环（Lead 维护） */
+/* 一杆入袋 — 入口 / UI 装配 / 输入 / 循环（Lead 维护） */
 (function () {
   var Pool = (window.Pool = window.Pool || {});
   var C = Pool.CONFIG;

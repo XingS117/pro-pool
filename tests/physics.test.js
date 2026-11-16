@@ -1,5 +1,5 @@
 /* ============================================================
- * 即刻开球 / PRO POOL — js/physics.js Node 单测
+ * 一杆入袋 / PRO POOL — js/physics.js Node 单测
  * 运行：node tests/physics.test.js
  * 不依赖任何第三方库；用 vm 模拟浏览器 window 后加载
  * js/config.js + js/physics.js（经典 script 加载顺序）。

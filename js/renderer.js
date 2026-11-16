@@ -1,5 +1,5 @@
 /* ============================================================================
- * 即刻开球 / PRO POOL — Canvas 渲染器
+ * 一杆入袋 / PRO POOL — Canvas 渲染器
  * 文件：js/renderer.js   负责人：visuals-dev
  *
  * 经典 script（非 ES module），挂载 window.Pool.Renderer。

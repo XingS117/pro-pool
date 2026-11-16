@@ -1,4 +1,4 @@
-/* 即刻开球 — 游戏流程 / 八球规则 / 关卡 / 存档（Lead 维护） */
+/* 一杆入袋 — 游戏流程 / 八球规则 / 关卡 / 存档（Lead 维护） */
 (function () {
   var Pool = (window.Pool = window.Pool || {});
   var U = Pool.UTIL;

@@ -1,4 +1,4 @@
-/* 即刻开球 / PRO POOL — AI 与关卡无头测试（ai-levels-dev）
+/* 一杆入袋 / PRO POOL — AI 与关卡无头测试（ai-levels-dev）
  * 运行：node tests/ai.sim.js
  * 加载顺序与浏览器一致：config.js → physics.js（可选）→ ai.js → levels.js
  * 若 js/physics.js 尚未就绪，测试会挂载内置 MiniWorld 作为测试替身，并明确标注。
@@ -298,7 +298,7 @@ const W = C.table.width;
 const H = C.table.height;
 const R = C.table.ballRadius;
 
-console.log('即刻开球 — AI / 关卡无头测试');
+console.log('一杆入袋 — AI / 关卡无头测试');
 console.log('物理实现: ' + physicsSource);
 console.log('AI 版本: ' + (AI && AI.version) + ' / 关卡数: ' + (LEVELS ? LEVELS.length : 0));
 

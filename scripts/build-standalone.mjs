@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * 即刻开球 · PRO POOL — 单文件构建脚本（standalone builder）
+ * 一杆入袋 · PRO POOL — 单文件构建脚本（standalone builder）
  * ---------------------------------------------------------------------------
  * 作用：把 index.html 中的本地样式表 <link> 与 8 个经典 <script src="js/*.js">
  *       按文档顺序内联，生成一个可双击/静态托管的单文件：
@@ -33,7 +33,7 @@ const ENTRY_HTML = path.join(ROOT, 'index.html');
 const OUT_DIR = path.join(ROOT, 'dist');
 const OUT_HTML = path.join(OUT_DIR, 'pro-pool.html');
 
-const APP_NAME = '即刻开球 · PRO POOL';
+const APP_NAME = '一杆入袋 · PRO POOL';
 const APP_VERSION = '1.1.0';
 
 /** 契约要求的经典 script 加载顺序（docs/CONTRACT.md）。 */

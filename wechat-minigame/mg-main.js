@@ -1,4 +1,4 @@
-/* 即刻开球 PRO POOL · 微信小游戏主程序（canvas UI，复用核心物理/AI/规则/渲染） */
+/* 一杆入袋 PRO POOL · 微信小游戏主程序（canvas UI，复用核心物理/AI/规则/渲染） */
 require('./adapter.js');
 require('./core.js');
 const P = window.Pool;
@@ -28,7 +28,7 @@ let agree = false;
 try { agree = wx.getStorageSync('pp_privacy') === '1'; } catch (e) {}
 if (agree) screen = 'menu';
 // 分享
-try { wx.showShareMenu({ withShareTicket: true }); wx.onShareAppMessage(() => ({ title: '即刻开球 PRO POOL · 真实物理台球，免费即玩' })); } catch (e) {}
+try { wx.showShareMenu({ withShareTicket: true }); wx.onShareAppMessage(() => ({ title: '一杆入袋 PRO POOL · 真实物理台球，免费即玩' })); } catch (e) {}
 // UI 矩形
 const R = {
   solo: { x: W * 0.16, y: H * 0.40, w: W * 0.68, h: 52 },
@@ -96,7 +96,7 @@ function drawUI() {
     btn(R.agree, '同意并开始', '#2ea44f', '#fff');
   } else if (screen === 'menu') {
     overlay(0.88);
-    ctx.fillStyle = '#e8c478'; ctx.font = '700 40px sans-serif'; ctx.fillText('即刻开球', W / 2, H * 0.22);
+    ctx.fillStyle = '#e8c478'; ctx.font = '700 40px sans-serif'; ctx.fillText('一杆入袋', W / 2, H * 0.22);
     ctx.fillStyle = '#f5f2e8'; ctx.font = '600 20px sans-serif'; ctx.fillText('PRO POOL', W / 2, H * 0.22 + 40);
     ctx.font = '13px sans-serif'; ctx.fillStyle = 'rgba(245,242,232,0.7)'; ctx.fillText('真实物理 · 免费 · 无广告', W / 2, H * 0.22 + 68);
     btn(R.solo, '单人挑战', '#2ea44f', '#fff');

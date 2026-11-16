@@ -9,7 +9,7 @@ const nodeTests = [
   'tests/physics.test.js','tests/ai.sim.js','tests/coins.test.js','tests/level_placements.test.js',
   'tests/rules.test.js','tests/game_logic.test.js','tests/break_rules.test.js','tests/reward.test.js',
   'tests/break_spread.test.js','tests/scratch_rules.test.js',
-  'tests/regressions.test.js','tests/collision_fidelity.test.js','tests/physics_contract.test.js','tests/physics_snapshot.test.js','tests/player_perspective.test.js','tests/mg_runtime.test.js','tests/jitter_check.js','tests/cue_points.test.js','tests/spin_points_ui.test.js','tests/ghost_ball.test.js',
+  'tests/regressions.test.js','tests/collision_fidelity.test.js','tests/physics_contract.test.js','tests/physics_snapshot.test.js','tests/player_perspective.test.js','tests/mg_runtime.test.js','tests/mg_compile_preflight.test.js','tests/jitter_check.js','tests/cue_points.test.js','tests/spin_points_ui.test.js','tests/ghost_ball.test.js',
   'tests/ai_aimable.test.js','tests/ai_tiers.test.js','tests/ai_lipcheck.js','tests/ai_runout.js',
   'tests/ai_e2e_hard.js','tests/full_audit.js'
 ];

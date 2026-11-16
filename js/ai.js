@@ -1,4 +1,4 @@
-/* 即刻开球 / PRO POOL — 机器人决策 AI（ai-levels-dev）
+/* 一杆入袋 / PRO POOL — 机器人决策 AI（ai-levels-dev）
  * 对外接口：Pool.AI.chooseShot(world, opts)
  * 约束：绝不修改传入 world；所有候选通过 world.clone() 试打验证。
  */

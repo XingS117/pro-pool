@@ -1,4 +1,4 @@
-/* 即刻开球 / PRO POOL — 关卡数据（ai-levels-dev 维护）
+/* 一杆入袋 / PRO POOL — 关卡数据（ai-levels-dev 维护）
  * 坐标单位米，原点在台呢左上角，x 向右 (2.54)，y 向下 (1.27)。
  * Pool.LEVELS = [ ... ]，完整摆球（不含母球）。
  *
