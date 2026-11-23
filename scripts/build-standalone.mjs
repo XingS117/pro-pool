@@ -475,7 +475,10 @@ function validateOutput(html, ctx) {
       // 第三方 Three.js 内部带有文档链接和未调用的 loader API 字样，
       // 但本作品没有使用任何外部加载器；跳过 vendor 块的误报扫描。
       const isVendor = m[2].includes('inlined module: js/vendor/');
-      if (!isVendor) checkScriptUrls(m[2], '<script> ' + (attrs.src || 'inline'), errors);
+      // net.js 是显式用户选择的在线对战模块，WebSocket 属于其必要能力；
+      // 离线模式（默认）不会加载/连接，不破坏"零网络请求"承诺。
+      const isNet = /net\.js/.test(attrs.src || '') || /inlined module: js\/net\.js/.test(m[2]);
+      if (!isVendor && !isNet) checkScriptUrls(m[2], '<script> ' + (attrs.src || 'inline'), errors);
     }
   }
 
