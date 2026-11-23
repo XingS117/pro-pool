@@ -8,7 +8,7 @@ import { randomInt } from 'node:crypto';
 const PORT = Number(process.env.POOL_WS_PORT || 8787);
 const HOST = process.env.POOL_WS_HOST || '127.0.0.1';
 const WAIT_TTL = 30 * 60 * 1000;      // 等待中房间 30 分钟
-const DISCONNECT_TTL = 60 * 1000;     // 掉线重连窗口 60 秒
+const DISCONNECT_TTL = Number(process.env.POOL_WS_DISCONNECT_TTL || 60) * 1000; // 掉线重连窗口（默认 60 秒）
 const REMATCH_TTL = 60 * 1000;        // 对局结束再来一局窗口 60 秒
 const EMPTY_TTL = 30 * 1000;          // 空房间 30 秒
 
@@ -58,7 +58,7 @@ function roomTick() {
     if (!room.started && now - room.createdAt > WAIT_TTL) destroyRoom(code);
   }
 }
-setInterval(roomTick, 5000);
+setInterval(roomTick, Number(process.env.POOL_WS_TICK_MS || 5000));
 
 function validShot(m, room) {
   const n = v => typeof v === 'number' && isFinite(v);
@@ -115,6 +115,12 @@ wss.on('connection', (ws) => {
         try { seat.ws.close(); } catch (e) {}
         seat.ws = ws; seat.connected = true; seat.disconnectedAt = null;
         bySocket.set(ws, { roomCode: code, seat: idx });
+        // rejoin 必然来自离线恢复：无条件通知房间内其他人（旧 seat 的引用已失效）
+        for (const other of r.seats) {
+          if (other && other !== seat && other.connected) {
+            send(other.ws, { type: 'opponent_reconnected', seat: idx });
+          }
+        }
         send(ws, { type: 'room_joined', code, seat: idx, seatCode: seat.seatCode, opponent: '对手' });
         if (r.started) send(ws, { type: 'start', firstPlayer: 0, resumed: true, turn: r.turn, lastShot: r.lastShot });
         break;
@@ -162,8 +168,12 @@ wss.on('connection', (ws) => {
     const ctx = bySocket.get(ws); if (!ctx) return;
     const room = getRoom(ctx.roomCode); if (!room) return;
     const seat = room.seats[ctx.seat];
-    if (seat && seat.ws === ws) { seat.connected = false; seat.disconnectedAt = Date.now(); }
-    broadcast(room, { type: 'opponent_disconnected', seat: ctx.seat });
+    if (seat && seat.ws === ws) {
+      seat.connected = false; seat.disconnectedAt = Date.now();
+      // 只有"该连接仍是当前座位连接"才算真正掉线；
+      // rejoin 时旧连接的延迟 close 不能再广播一次掉线遮罩。
+      broadcast(room, { type: 'opponent_disconnected', seat: ctx.seat });
+    }
   });
 });
 function leave(ctx, room, ws) {

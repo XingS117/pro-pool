@@ -206,7 +206,16 @@
       <div class="spin-hint">调整时瞄准已锁定 · 按 L 解锁 · 按 Space 出杆</div>
     </div>
 
-    <div class="hint-bar" id="hint-bar"><span class="hint-dot"></span><span id="hint-text">移动鼠标瞄准 · 按住左键蓄力 · 松开击球</span></div>
+    <div class="reconnect-mask" id="reconnect-mask" hidden>
+  <div class="reconnect-card">
+    <div class="reconnect-spin"></div>
+    <div class="reconnect-title">对方重连中</div>
+    <div class="reconnect-sub">对局已暂停，等待对手返回…</div>
+    <div class="reconnect-count" id="reconnect-count">60</div>
+    <div class="reconnect-unit">秒后判对方弃权 · 你获胜</div>
+  </div>
+</div>
+<div class="hint-bar" id="hint-bar"><span class="hint-dot"></span><span id="hint-text">移动鼠标瞄准 · 按住左键蓄力 · 松开击球</span></div>
     <div class="toast" id="toast"></div>
     <div class="turn-flash" id="turn-flash"></div>
   </section>

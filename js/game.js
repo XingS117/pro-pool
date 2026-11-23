@@ -417,6 +417,10 @@
   /* ---------------------------------- 瞄准 / 击球 ---------------------------------- */
   Game.prototype.isHumanTurn = function () {
     if (this.mode === 'level') return true;
+    // 在线对战：只有轮到本机座位时才允许操作（座位映射由 main.js 设置）
+    if (this.mode === 'online' && typeof this.onlineSeat === 'number') {
+      return this.activePlayer === this.onlineSeat;
+    }
     var p = this.players[this.activePlayer];
     return !!p && !p.isAI;
   };
@@ -426,6 +430,8 @@
   };
 
   Game.prototype.canShoot = function () {
+    // 在线对战：对手重连等待期间禁止出杆
+    if (this.mode === 'online' && this._onlinePaused) return false;
     return this.phase === 'aim' && !this.paused && this.world && this.world.allStopped() &&
       !this.ballInHand && this.isHumanTurn() && !this.charging;
   };
@@ -587,9 +593,12 @@
     this.aimAngle = p.angle;
     this.aimTargetAngle = p.angle;
     this.aimSnap = null;
+    // 远端一杆走完整物理+规则流程；结算时 onStateSettled 会报告最终 activePlayer，
+    // 两端因物理确定性会得到相同结果，无需手动设置回合。
     this._suppressNet = true;
-    try { return this.shoot(p.power, p.spinX, p.spinY); }
-    finally { this._suppressNet = false; }
+    var ok = this.shoot(p.power, p.spinX, p.spinY);
+    if (!ok) this._suppressNet = false;
+    return ok;
   };
 
   Game.prototype.resetSpin = function () {
@@ -1190,7 +1199,11 @@
     if (this.audio && switched && !foul) this.audio.ui();
     var newPlayer = this.players[this.activePlayer];
     this.emit('hud', this.getState());
-    if (!this._suppressNet) this.onStateSettled({ activePlayer: this.activePlayer, over: !!this.matchResult });
+    if (this._suppressNet) {
+      this._suppressNet = false;
+    } else {
+      this.onStateSettled({ activePlayer: this.activePlayer, over: !!this.matchResult });
+    }
     this.emit('turn', {
       player: this.activePlayer,
       name: newPlayer.name,
@@ -1362,7 +1375,7 @@
       coins = this.applyCoins(coinsDelta);
       this.persist(this.save);
       this.emit('save', this.save);
-    } else if (this.mode === 'pvp') {
+    } else if (this.mode === 'pvp' || this.mode === 'online') {
       // 本地双人共用一份存档：胜者加金币，败者不扣
       coinsDelta = eco.pvpWin;
       coins = this.applyCoins(coinsDelta);
@@ -1382,7 +1395,7 @@
     this.emit('hud', this.getState());
     this.emit('matchOver', this.matchResult);
     if (this.audio) {
-      if (this.mode === 'pvp' || humanWon) this.audio.win();
+      if (this.mode === 'pvp' || this.mode === 'online' || humanWon) this.audio.win();
       else this.audio.lose();
     }
   };

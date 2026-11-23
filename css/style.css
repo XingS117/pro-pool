@@ -1917,3 +1917,16 @@ body.ingame.mode-pvp .player-card.is-idle{border-radius:11px}
 .power-fill,.touch-shoot-glow{transition:height .08s linear}
 /* 尊重减少动效偏好 */
 @media (prefers-reduced-motion:reduce){*,*:before,*:after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+
+/* -------- 对手重连等待遮罩 -------- */
+.reconnect-mask{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(6,10,8,.82);backdrop-filter:blur(10px);animation:fadeIn .25s ease}
+.reconnect-mask[hidden]{display:none}
+.reconnect-card{text-align:center;padding:34px 42px;border-radius:20px;border:1px solid rgba(200,164,95,.28);background:linear-gradient(160deg,rgba(30,42,32,.96),rgba(12,18,14,.96));box-shadow:0 24px 70px rgba(0,0,0,.6);min-width:300px}
+.reconnect-spin{width:46px;height:46px;margin:0 auto 18px;border-radius:50%;border:3px solid rgba(200,164,95,.18);border-top-color:var(--gold);animation:spin 1s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.reconnect-title{font-family:var(--serif);font-size:24px;color:var(--cream);letter-spacing:2px;margin-bottom:8px}
+.reconnect-sub{font-size:12px;color:var(--muted);margin-bottom:18px}
+.reconnect-count{font-family:var(--serif);font-size:56px;font-weight:800;color:var(--gold-2);line-height:1;font-variant-numeric:tabular-nums;animation:countPulse 1s ease-in-out infinite}
+@keyframes countPulse{0%,100%{opacity:1}50%{opacity:.55}}
+.reconnect-unit{font-size:11px;color:var(--dim);margin-top:10px;letter-spacing:.5px}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}

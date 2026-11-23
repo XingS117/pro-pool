@@ -45,7 +45,7 @@ const service = '[Unit]\nDescription=PRO POOL WebSocket Signaling\nAfter=network
 const svcLocal = path.join(ROOT, 'tests/_pool-ws.service');
 fs.writeFileSync(svcLocal, service, 'utf8');
 await put(sftp, svcLocal, '/tmp/pool-ws.service');
-r = await run('sudo install -m 644 /tmp/pool-ws.service /etc/systemd/system/pool-ws.service && sudo systemctl daemon-reload && sudo systemctl enable --now pool-ws && sleep 2 && sudo systemctl is-active pool-ws');
+r = await run('sudo install -m 644 /tmp/pool-ws.service /etc/systemd/system/pool-ws.service && sudo systemctl daemon-reload && sudo systemctl enable --now pool-ws && sudo systemctl restart pool-ws && sleep 2 && sudo systemctl is-active pool-ws');
 console.log('--- systemd ---\n' + r.out + r.eo);
 // nginx 反代（幂等）：在主域名配置里插入 /pool-ws/ location
 const locBlock = "    location /pool-ws/ {\n      proxy_pass http://127.0.0.1:8787/;\n      proxy_http_version 1.1;\n      proxy_set_header Upgrade $http_upgrade;\n      proxy_set_header Connection \"upgrade\";\n      proxy_set_header Host $host;\n    }\n";
