@@ -8,7 +8,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const TARGET = path.resolve(process.argv[2] || path.join(ROOT, '..', 'pro-pool-oss'));
 
 const FILES = ['index.html','README.md','README.zh-CN.md','LICENSE','启动游戏.bat','privacy.html'];
-const DIRS  = ['css','js','scripts','docs/screenshots','docs/assets','wechat-minigame'];
+const DIRS  = ['css','js','scripts','docs/screenshots','docs/assets','wechat-minigame','server'];
 const DOCS  = ['CREDITS.md','DEPLOY.md','ghost-ball-preview.png'];
 
 function copyDir(src, dst, filter) {

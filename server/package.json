@@ -1,0 +1,10 @@
+{
+  "name": "pool-ws",
+  "version": "1.0.0",
+  "private": true,
+  "description": "一杆入袋 · 在线对战信令服务器（房间/转发，不跑物理）",
+  "main": "pool-ws.mjs",
+  "type": "module",
+  "scripts": { "start": "node pool-ws.mjs" },
+  "dependencies": { "ws": "^8.18.0" }
+}
