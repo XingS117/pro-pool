@@ -180,7 +180,7 @@
     </div>
 
     <div class="spin-widget" id="spin-widget">
-      <div class="spin-head"><span>击球点</span><button id="spin-close" aria-label="关闭">×</button></div>
+      <div class="spin-head"><span>击球点</span><button id="spin-close" class="spin-close" aria-label="关闭">✕</button></div>
       <div class="spin-ball" id="spin-ball">
         <span class="spin-ring"></span>
         <span class="spin-cross h"></span>
@@ -199,8 +199,8 @@
         <button type="button" data-spin-x="-0.5" data-spin-y="-0.5" title="低杆左塞：先回缩，吃库后叠加左塞偏移">低杆左塞</button>
         <button type="button" data-spin-x="0" data-spin-y="-0.7" title="低杆（后斯登）：强烈后旋，撞击后回缩">低杆</button>
         <button type="button" data-spin-x="0.5" data-spin-y="-0.5" title="低杆右塞：先回缩，吃库后叠加右塞偏移">低杆右塞</button>
-        <button type="button" data-spin-x="0" data-spin-y="0.35" title="中高杆：微弱前旋，轻微前冲，容错率最高">中高杆</button>
-        <button type="button" data-spin-x="0" data-spin-y="-0.35" title="中低杆：微弱后旋，小幅回缩，过渡柔和">中低杆</button>
+        <button type="button" data-spin-x="0" data-spin-y="0.35" class="spin-wide-left" title="中高杆：微弱前旋，轻微前冲，容错率最高">中高杆</button>
+        <button type="button" data-spin-x="0" data-spin-y="-0.35" class="spin-wide-right" title="中低杆：微弱后旋，小幅回缩，过渡柔和">中低杆</button>
       </div>
       <p class="spin-desc" id="spin-desc">中杆 · 定杆：出杆无自转，先滑动后自然滚动；短距离撞击后基本停在原地，分离角接近 90°。</p>
       <div class="spin-hint">调整时瞄准已锁定 · 按 L 解锁 · 按 Space 出杆</div>
@@ -237,7 +237,14 @@
               <span class="menu-btn-copy"><strong>双人对战</strong><em>同一台电脑，轮流上手</em></span>
               <span class="menu-btn-arrow">→</span>
             </button>
-            <button class="menu-btn" data-action="levels">
+            <button class="menu-btn" data-action="online">
+        <span class="menu-btn-icon">
+          <svg class="ico"><use href="#i-trophy"/></svg>
+        </span>
+        <span class="menu-btn-copy"><strong>在线对战</strong><em>房间号联机，和好友隔空过招</em></span>
+        <span class="menu-btn-arrow">→</span>
+      </button>
+      <button class="menu-btn" data-action="levels">
               <span class="menu-btn-icon">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1-5.4-2.9-5.4 2.9 1-6.1L3.2 9.5l6.1-.9L12 3Z" fill="none" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>
               </span>
@@ -318,7 +325,28 @@
       </div>
     </section>
 
-    <section class="screen page-screen" id="screen-levels">
+    <section class="screen page-screen" id="screen-online">
+  <div class="online-wrap">
+    <div class="online-head"><span class="eyebrow">ONLINE · 在线对战</span><h2>隔空过招</h2><p>自建房间，把 4 位房间号告诉朋友，即可同台竞技。</p></div>
+    <div class="online-card">
+      <button class="online-primary" id="online-create">创建房间</button>
+      <div class="online-divider"><span>或</span></div>
+      <div class="online-join">
+        <input id="online-code" type="text" inputmode="numeric" maxlength="4" placeholder="输入 4 位房间号" autocomplete="off">
+        <button id="online-join-btn">加入</button>
+      </div>
+      <div class="online-status" id="online-status">未连接</div>
+    </div>
+    <div class="online-room" id="online-room" hidden>
+      <div class="online-room-label">房间号</div>
+      <div class="online-room-code" id="online-room-code">0000</div>
+      <button class="online-copy" id="online-copy">复制房间号</button>
+      <div class="online-room-tip">等待对手加入…</div>
+    </div>
+    <button class="online-back" data-action="menu">← 返回主菜单</button>
+  </div>
+</section>
+<section class="screen page-screen" id="screen-levels">
       <div class="page-head">
         <button class="back-btn" data-action="back">←</button>
         <div><span class="page-kicker">关卡挑战</span><h2>关卡模式</h2></div>
@@ -434,6 +462,7 @@
 <script src="js/ai.js"></script>
 <script src="js/levels.js"></script>
 <script src="js/game.js"></script>
-<script src="js/main.js"></script>
+<script src="js/net.js"></script>
+  <script src="js/main.js"></script>
 </body>
 </html>

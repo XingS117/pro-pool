@@ -51,6 +51,14 @@
       {
         "type": "folder",
         "value": "scripts"
+      },
+      {
+        "type": "folder",
+        "value": "_trash"
+      },
+      {
+        "type": "file",
+        "value": "测试清单.md"
       }
     ],
     "include": []

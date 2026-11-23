@@ -45,6 +45,7 @@ const EXPECTED_MODULE_ORDER = [
   'js/ai.js',
   'js/levels.js',
   'js/game.js',
+  'js/net.js',
   'js/main.js'
 ];
 

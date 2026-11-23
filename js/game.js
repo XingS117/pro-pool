@@ -65,6 +65,10 @@
     opts = opts || {};
     this.renderer = opts.renderer || null;
     this.audio = opts.audio || null;
+    // 在线对战钩子（离线模式默认空实现，行为完全不变）
+    this.onLocalShot = opts.onLocalShot || function () {};
+    this.onStateSettled = opts.onStateSettled || function () {};
+    this._suppressNet = false;
     this.save = opts.save || this.defaultSave();
     this.persist = opts.persist || function () {};
     this.listeners = {};
@@ -315,10 +319,10 @@
     this.cue = this.findCue(this.save.equipped) || C.cues[0];
     this.guideEnabled = this.save.settings ? this.save.settings.guide !== false : true;
 
-    if (mode === 'pvp') {
+    if (mode === 'pvp' || mode === 'online') {
       this.players = [
-        { name: '玩家 1', short: 'P1', group: null, isAI: false, color: '#e8cd8e' },
-        { name: '玩家 2', short: 'P2', group: null, isAI: false, color: '#9fc7ae' }
+        { name: mode === 'online' ? '你' : '玩家 1', short: mode === 'online' ? '你' : 'P1', group: null, isAI: false, color: '#e8cd8e' },
+        { name: mode === 'online' ? '对手' : '玩家 2', short: mode === 'online' ? '对手' : 'P2', group: null, isAI: false, color: '#9fc7ae' }
       ];
     } else {
       this.players = [
@@ -572,6 +576,22 @@
     this.emit('spin', { x: this.spinX, y: this.spinY });
   };
 
+  /* 在线对战：执行对手的一杆（用完全相同的 shoot 路径，保证物理一致） */
+  Game.prototype.applyRemoteShot = function (p) {
+    if (!p || this.phase !== 'aim') return false;
+    var cue = this.world && this.world.getBall('cue');
+    if (typeof p.cueX === 'number' && typeof p.cueY === 'number' && cue) {
+      cue.x = p.cueX; cue.y = p.cueY; cue.vx = 0; cue.vy = 0;
+      this.ballInHand = false;
+    }
+    this.aimAngle = p.angle;
+    this.aimTargetAngle = p.angle;
+    this.aimSnap = null;
+    this._suppressNet = true;
+    try { return this.shoot(p.power, p.spinX, p.spinY); }
+    finally { this._suppressNet = false; }
+  };
+
   Game.prototype.resetSpin = function () {
     this.spinX = 0;
     this.spinY = 0;
@@ -633,6 +653,14 @@
     this.ai.stage = 'done';
     if (this.audio) this.audio.cueHit(power);
     this.emit('shot', { power: power, effective: shotPower, angle: this.aimAngle, spinX: sx, spinY: sy });
+    if (!this._suppressNet) {
+      var cueNow = this.world.getBall('cue');
+      this.onLocalShot({
+        angle: this.aimAngle, power: shotPower, spinX: sx, spinY: sy,
+        cueX: this.ballInHand && cueNow ? cueNow.x : null,
+        cueY: this.ballInHand && cueNow ? cueNow.y : null
+      });
+    }
     this.emit('hud', this.getState());
     return true;
   };
@@ -1162,6 +1190,7 @@
     if (this.audio && switched && !foul) this.audio.ui();
     var newPlayer = this.players[this.activePlayer];
     this.emit('hud', this.getState());
+    if (!this._suppressNet) this.onStateSettled({ activePlayer: this.activePlayer, over: !!this.matchResult });
     this.emit('turn', {
       player: this.activePlayer,
       name: newPlayer.name,

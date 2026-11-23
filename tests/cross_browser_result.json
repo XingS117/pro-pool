@@ -1,0 +1,61 @@
+{
+ "engines": [
+  "chromium",
+  "firefox",
+  "webkit"
+ ],
+ "cases": [
+  {
+   "name": "直球中袋",
+   "same": true,
+   "maxDiff": 0,
+   "where": "-"
+  },
+  {
+   "name": "切20度",
+   "same": true,
+   "maxDiff": 0,
+   "where": "-"
+  },
+  {
+   "name": "切45度",
+   "same": true,
+   "maxDiff": 0,
+   "where": "-"
+  },
+  {
+   "name": "高杆跟进",
+   "same": true,
+   "maxDiff": 0,
+   "where": "-"
+  },
+  {
+   "name": "低杆回缩",
+   "same": true,
+   "maxDiff": 0,
+   "where": "-"
+  },
+  {
+   "name": "左塞",
+   "same": true,
+   "maxDiff": 0,
+   "where": "-"
+  },
+  {
+   "name": "右塞",
+   "same": true,
+   "maxDiff": 0,
+   "where": "-"
+  },
+  {
+   "name": "开球",
+   "same": true,
+   "maxDiff": 0,
+   "where": "-"
+  }
+ ],
+ "identical": 8,
+ "total": 8,
+ "fieldSame": 1280,
+ "fieldTotal": 1280
+}

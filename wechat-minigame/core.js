@@ -5892,8 +5892,12 @@
 
   AudioEngine.prototype.ui = function () {
     this.unlock();
+    // 音频不可用（未解锁 / 设备无 WebAudio / 初始化失败）时静默返回。
+    // 这里曾经直接读 this.ctx.currentTime：ctx 为 null 会抛 TypeError，
+    // 而调用方 endShot() 在音效之后还要切回合、启动 AI，一旦抛错整局卡死。
+    if (!this.ctx || !this.ready) return;
     // 柔和界面反馈：不做高频“biu”滑音
-    this._tone(880, 'triangle', 0.045, 0.012, this.ctx.currentTime);
+    try { this._tone(880, 'triangle', 0.045, 0.012, this.ctx.currentTime); } catch (e) {}
   };
 
   /** 程序化人群欢呼：带通噪声 + 随机拍手 + 口哨，不依赖外部音频。 */
@@ -8014,7 +8018,7 @@
     this.emit('save', this.save);
     this.emit('cue', this.getState());
     this.emit('toast', { text: '已购入并装备 · ' + cue.name, type: 'good' });
-    if (this.audio) this.audio.star();
+    if (this.audio) { try { this.audio.star(); } catch (e) {} }
     return true;
   };
 
@@ -8028,7 +8032,7 @@
     this.emit('save', this.save);
     this.emit('cue', this.getState());
     this.emit('toast', { text: '已装备 · ' + cue.name, type: 'good' });
-    if (this.audio) this.audio.ui();
+    if (this.audio) { try { this.audio.ui(); } catch (e) {} }
     return true;
   };
 
@@ -8457,7 +8461,7 @@
     this.charging = false;
     this.power = shotPower;
     this.ai.stage = 'done';
-    if (this.audio) this.audio.cueHit(power);
+    if (this.audio) { try { this.audio.cueHit(power); } catch (e) {} }
     this.emit('shot', { power: power, effective: shotPower, angle: this.aimAngle, spinX: sx, spinY: sy });
     this.emit('hud', this.getState());
     return true;
@@ -8576,7 +8580,7 @@
     this.faceNearestTarget();
     this.emit('hud', this.getState());
     this.emit('toast', { text: '母球已放好 · 不满意可以再按住母球拖动调整', type: 'good' });
-    if (this.audio) this.audio.ui();
+    if (this.audio) { try { this.audio.ui(); } catch (e) {} }
     return true;
   };
 
@@ -8606,7 +8610,7 @@
     cue.pocketIndex = null;
     cue.vx = 0; cue.vy = 0;
     cue.x = x; cue.y = y;
-    if (this.audio) this.audio.ui();
+    if (this.audio) { try { this.audio.ui(); } catch (e) {} }
     this.emit('hud', this.getState());
     return true;
   };
@@ -8733,20 +8737,20 @@
         if (a.id === 'cue' && b.id !== 'cue') ctx.firstHitId = b.id;
         else if (b.id === 'cue' && a.id !== 'cue') ctx.firstHitId = a.id;
       }
-      if (this.audio) this.audio.ball(evt.speed || 0);
+      if (this.audio) { try { this.audio.ball(evt.speed || 0); } catch (e) {} }
     } else if (evt.type === 'cushion') {
       if (ctx.firstHitId) ctx.railAfterContact = true;
       if (ctx.firstHitId && evt.ball && evt.ball.id !== 'cue' && evt.ball.active) {
         ctx.railBalls[evt.ball.id] = true;
       }
-      if (this.audio) this.audio.cushion(evt.speed || 0);
+      if (this.audio) { try { this.audio.cushion(evt.speed || 0); } catch (e) {} }
     } else if (evt.type === 'pocket') {
       var ball = evt.ball;
       if (ball) {
         ctx.potted.push(ball);
         if (ball.id === 'cue') ctx.cuePotted = true;
       }
-      if (this.audio) this.audio.pocket();
+      if (this.audio) { try { this.audio.pocket(); } catch (e) {} }
     }
     if (this.renderer && this.renderer.handleEvent) {
       try { this.renderer.handleEvent(evt); } catch (e) { /* ignore render fx */ }
@@ -8966,7 +8970,7 @@
         text: ctx.isBreak ? '开球进球 · 球台仍然开放 · 继续出杆' : '进球 × ' + legalPot + ' · 继续出杆',
         type: 'good'
       });
-      if (this.audio) this.audio.star();
+      if (this.audio) { try { this.audio.star(); } catch (e) {} }
     } else {
       this.activePlayer = opponentIdx;
       switched = true;
@@ -8985,7 +8989,9 @@
     this.faceNearestTarget();
     if (!this.ballInHand) this.ensureCueSafe();
 
-    if (this.audio && switched && !foul) this.audio.ui();
+    // 音效与回合推进解耦：音频设备异常绝不能阻断 startAITurn，
+    // 否则玩家打完一杆后 AI 永不出杆，整局卡死在 aim 阶段。
+    if (this.audio && switched && !foul) { try { this.audio.ui(); } catch (e) {} }
     var newPlayer = this.players[this.activePlayer];
     this.emit('hud', this.getState());
     this.emit('turn', {
@@ -9045,7 +9051,7 @@
     if (!ctx.cuePotted) {
       if (objPotted.length) {
         this.emit('toast', { text: '目标球进袋 × ' + objPotted.length + ' · 还剩 ' + (level.maxShots - this.shots) + ' 杆', type: 'good' });
-        if (this.audio) this.audio.star();
+        if (this.audio) { try { this.audio.star(); } catch (e) {} }
       } else {
         this.emit('toast', { text: '未进球 · 还剩 ' + (level.maxShots - this.shots) + ' 杆', type: 'info' });
       }
@@ -9128,8 +9134,7 @@
     this.emit('levelOver', this.levelResult);
     // Failure must also sound when the game began from a direct level card/API path.
     if (this.audio) {
-      if (success) this.audio.win();
-      else this.audio.lose();
+      try { if (success) this.audio.win(); else this.audio.lose(); } catch (e) {}
     }
   };
 
@@ -9179,8 +9184,7 @@
     this.emit('hud', this.getState());
     this.emit('matchOver', this.matchResult);
     if (this.audio) {
-      if (this.mode === 'pvp' || humanWon) this.audio.win();
-      else this.audio.lose();
+      try { if (this.mode === 'pvp' || humanWon) this.audio.win(); else this.audio.lose(); } catch (e) {}
     }
   };
 

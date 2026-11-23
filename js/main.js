@@ -107,7 +107,9 @@
         renderer: renderer,
         audio: audio,
         save: save,
-        persist: persistSave
+        persist: persistSave,
+        onLocalShot: function (p) { onOnlineShot(p); },
+        onStateSettled: function (s) { onOnlineSettled(s); }
       });
     } catch (e) {
       console.error('Game init failed', e);
@@ -289,6 +291,7 @@
 
   /* 声明式事件 → 命令分发：DOM 只写 data-action，控制器不持有 DOM 引用 */
   var commandMap = {};
+command('online', function () { showScreen('online'); refreshOnlineUI(); });
   function command(name, fn) { commandMap[name] = fn; }
   function runCommand(name, el) {
     var fn = commandMap[name];
@@ -496,17 +499,20 @@
     $('btn-sound').addEventListener('click', toggleSound);
     $('btn-pause').addEventListener('click', function () { openPause(); });
     $('btn-spin').addEventListener('click', function () { toggleSpinPanel(); });
+    initOnline();
     $('spin-close').addEventListener('click', function () { closeSpinPanel(); });
 
     var canvas = $('game-canvas');
-    canvas.addEventListener('contextmenu', function (e) { e.preventDefault(); });
     canvas.addEventListener('pointerdown', onCanvasDown);
     canvas.addEventListener('pointermove', onCanvasMove);
-  canvas.addEventListener('contextmenu', function (e) {
-    if (!canHumanAct()) return;
-    e.preventDefault();
-    openSpinPanel();
-  });
+    canvas.addEventListener('contextmenu', function (e) {
+      e.preventDefault();
+      // 右键切换：已打开则总是允许关闭，否则需可操作状态才打开
+      var widget = $('spin-widget');
+      if (widget && widget.classList.contains('open')) { closeSpinPanel(); return; }
+      if (!canHumanAct()) return;
+      openSpinPanel();
+    });
     canvas.addEventListener('pointerup', function () { onCanvasUp(); });
     canvas.addEventListener('pointercancel', function () {
       touchAiming = false;
@@ -1150,6 +1156,90 @@
       aimLocked = false;
       updatePowerUI(game.getState());
     }
+  }
+
+
+  /* ================================ 在线对战 ================================ */
+  var online = { active: false, version: 0, mySeat: -1, waiting: false, opponentConnected: true };
+
+  function setOnlineStatus(text, cls) {
+    var el = $('online-status'); if (!el) return;
+    el.textContent = text; el.className = 'online-status' + (cls ? ' ' + cls : '');
+  }
+  function refreshOnlineUI() {
+    if (!Pool.Net) { setOnlineStatus('网络模块未加载', 'err'); return; }
+    var st = Pool.Net.state;
+    var room = $('online-room');
+    if (room && st.roomCode) { room.hidden = false; var rc = $('online-room-code'); if (rc) rc.textContent = st.roomCode; }
+    else if (room) room.hidden = true;
+    if (online.active) setOnlineStatus('已连接 · 房间 ' + st.roomCode, 'ok');
+    else setOnlineStatus(st.connected ? '已连接服务器' : '未连接', st.connected ? 'ok' : '');
+  }
+  function initOnline() {
+    if (!Pool.Net) return;
+    var btn = $('online-create');
+    if (btn) btn.addEventListener('click', function () {
+      setOnlineStatus('正在创建房间…');
+      Pool.Net.createRoom().then(function (r) {
+        if (r._timeout) return setOnlineStatus('创建超时，请检查服务器', 'err');
+        online.active = true; online.mySeat = r.seat; online.version = 0; online.waiting = true;
+        refreshOnlineUI(); if (audio) audio.star();
+      }).catch(function () { setOnlineStatus('连接失败，请确认服务器已启动', 'err'); });
+    });
+    var join = $('online-join-btn');
+    if (join) join.addEventListener('click', function () {
+      var inp = $('online-code'); var code = inp ? inp.value.replace(/[^0-9]/g, '') : '';
+      if (code.length !== 4) return setOnlineStatus('请输入 4 位数字房间号', 'err');
+      setOnlineStatus('正在加入房间…');
+      Pool.Net.joinRoom(code).then(function (r) {
+        if (r.code === 'NO_ROOM') return setOnlineStatus('房间不存在或已失效', 'err');
+        if (r.code === 'ROOM_FULL') return setOnlineStatus('房间已满', 'err');
+        if (r._timeout) return setOnlineStatus('加入超时', 'err');
+        online.active = true; online.mySeat = r.seat; online.version = 0; online.waiting = true;
+        refreshOnlineUI();
+      }).catch(function () { setOnlineStatus('连接失败', 'err'); });
+    });
+    var copy = $('online-copy');
+    if (copy) copy.addEventListener('click', function () {
+      var code = Pool.Net.state.roomCode; if (!code) return;
+      if (navigator.clipboard) navigator.clipboard.writeText(code).then(function () { showToast({ text: '房间号已复制：' + code, type: 'good' }); });
+      else showToast({ text: '房间号：' + code, type: 'info' });
+    });
+    Pool.Net.on('start', function (m) {
+      online.active = true; online.version = 0; online.waiting = false;
+      startMatch('online');
+      if (game) game.activePlayer = m.firstPlayer;
+      showToast({ text: m.rematch ? '再来一局！' : (m.firstPlayer === online.mySeat ? '你先手，开球！' : '对手先手，请等待'), type: 'good' });
+      refreshHud();
+    });
+    Pool.Net.on('opponent_shot', function (m) {
+      if (!game || game.phase !== 'aim') return;
+      online.version = Math.max(online.version, m.version || 0);
+      game.applyRemoteShot(m);
+      if (game) game.activePlayer = 1 - online.mySeat;
+      refreshHud();
+    });
+    Pool.Net.on('opponent_disconnected', function () {
+      online.opponentConnected = false;
+      showToast({ text: '对手掉线，等待 60 秒重连…', type: 'foul' });
+    });
+    Pool.Net.on('opponent_left', function () {
+      online.active = false;
+      showToast({ text: '对手已离开房间', type: 'foul' });
+      showMenu();
+    });
+    Pool.Net.on('game_over', function (m) { showToast({ text: '对局结束', type: 'info' }); });
+    Pool.Net.on('error', function (m) { setOnlineStatus((m.code || 'ERR') + ': ' + (m.message || ''), 'err'); });
+  }
+  function onOnlineShot(p) {
+    if (!online.active || !Pool.Net) return;
+    online.version++;
+    Pool.Net.sendShot({ version: online.version - 1, angle: p.angle, power: p.power, spinX: p.spinX, spinY: p.spinY, cueX: p.cueX, cueY: p.cueY });
+  }
+  function onOnlineSettled(s) {
+    if (!online.active || !Pool.Net) return;
+    if (s.over) Pool.Net.gameOver(1 - online.mySeat, '清台');
+    else Pool.Net.swap(s.activePlayer);
   }
 
   /* ---------------------------------- 操作分发 ---------------------------------- */

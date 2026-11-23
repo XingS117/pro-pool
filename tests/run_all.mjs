@@ -11,9 +11,10 @@ const nodeTests = [
   'tests/break_spread.test.js','tests/scratch_rules.test.js',
   'tests/regressions.test.js','tests/collision_fidelity.test.js','tests/physics_contract.test.js','tests/physics_snapshot.test.js','tests/player_perspective.test.js','tests/mg_runtime.test.js','tests/mg_compile_preflight.test.js','tests/jitter_check.js','tests/cue_points.test.js','tests/spin_points_ui.test.js','tests/ghost_ball.test.js',
   'tests/ai_aimable.test.js','tests/ai_tiers.test.js','tests/ai_lipcheck.js','tests/ai_runout.js',
-  'tests/ai_e2e_hard.js','tests/full_audit.js'
+  'tests/ai_e2e_hard.js','tests/full_audit.js',
+  'tests/net_server.test.mjs','tests/net_e2e.test.mjs'
 ];
-const pyTests = ['tests/e2e_acceptance.py','tests/soak.py','tests/browser_audit.py','tests/spin_ui_audit.py','tests/ghost_ball_ui.py'];
+const pyTests = ['tests/e2e_acceptance.py','tests/soak.py','tests/browser_audit.py','tests/spin_ui_audit.py','tests/ghost_ball_ui.py','tests/cross_browser.test.py'];
 let fail = 0;
 function run(cmd, args, label) {
   const r = spawnSync(cmd, args, { cwd: root, encoding: 'utf8', timeout: 300000 });
