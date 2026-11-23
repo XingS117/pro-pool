@@ -14,7 +14,7 @@ const DOCS  = ['CREDITS.md','DEPLOY.md','ghost-ball-preview.png'];
 function copyDir(src, dst, filter) {
   fs.mkdirSync(dst, { recursive: true });
   for (const e of fs.readdirSync(src, { withFileTypes: true })) {
-    if (e.name.startsWith('_') || e.name.startsWith('.')) continue;
+    if (e.name.startsWith('_') || e.name.startsWith('.') || e.name === 'node_modules') continue;
     const s = path.join(src, e.name), d = path.join(dst, e.name);
     if (e.isDirectory()) copyDir(s, d, filter);
     else if (!filter || filter(e.name)) fs.copyFileSync(s, d);
