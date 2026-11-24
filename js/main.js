@@ -112,7 +112,9 @@
         onStateSettled: function (s) { onOnlineSettled(s); },
         onGroupAssigned: function (g) { onOnlineGroupAssigned(g); },
         onCuePlaced: function (p) { if (online.active && Pool.Net) Pool.Net.cuePlaced(p); },
-        onGameOver: function (r) { if (online.active && Pool.Net) Pool.Net.gameResult(r); }
+        onGameOver: function (r) { if (online.active && Pool.Net) Pool.Net.gameResult(r); },
+        onPauseChange: function (p) { if (online.active && Pool.Net) Pool.Net.pauseState(p); },
+        onTurnTimeout: function () { if (online.active && Pool.Net) Pool.Net.turnTimeout(); }
       });
     } catch (e) {
       console.error('Game init failed', e);
@@ -1252,6 +1254,25 @@ command('online', function () {
     });
     Pool.Net.on("group_assigned", function (g) { showGroupToast(g); });
     Pool.Net.on("cue_placed", function (p) { onCuePlacedRemote(p); });
+    Pool.Net.on("turn_timeout", function (t) {
+      if (!game || game.mode !== "online") return;
+      game.activePlayer = t.seat;
+      game.turnTime = 0; game._turnTimedOut = false;
+      showToast({ text: "本杆超时 · 自动换手", type: "foul" });
+      refreshHud();
+    });
+    Pool.Net.on("pause_state", function (p) {
+      if (!game || game.mode !== "online") return;
+      var mask = document.getElementById("pause-mask");
+      if (p.paused) {
+        if (mask) mask.hidden = false;
+        game._onlinePaused = true;
+      } else {
+        if (mask) mask.hidden = true;
+        if (!online.reconnectTimer) game._onlinePaused = false;
+      }
+      refreshHud();
+    });
     Pool.Net.on("game_result", function (r) {
       if (!game || game.mode !== "online" || game.phase === "over") return;
       if (r.snapshot && game.applyState) game.applyState(r.snapshot);
@@ -1727,11 +1748,26 @@ command('online', function () {
     hint.textContent = text;
   }
 
+  function updateTurnTimer(s) {
+    var el = $("turn-timer"); if (!el) return;
+    if (game.mode !== "online" || s.phase !== "aim" || s.isAI || game.paused || game._onlinePaused || s.ballInHand) {
+      el.hidden = true; return;
+    }
+    var left = Math.max(0, 45 - (game.turnTime || 0));
+    if (left > 10) { el.hidden = true; return; }
+    el.hidden = false;
+    var n = Math.ceil(left);
+    var num = $("turn-timer-num");
+    if (num && num.textContent !== String(n)) num.textContent = String(n);
+    el.classList.toggle("urgent", left <= 5);
+  }
+
   function updateLiveUI() {
     if (!game) return;
     var s = game.getState();
     updatePowerUI(s);
     updateAngleUI(s);
+    updateTurnTimer(s);
     updateTouchShootState(s);
     // 击球点指示（同步节流：仅变化时写 DOM）
     if (Math.abs(s.spinX - lastSpin.x) > 0.001 || Math.abs(s.spinY - lastSpin.y) > 0.001) {

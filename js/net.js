@@ -63,6 +63,8 @@
     cuePlaced: function (info) { return send({ type: 'cue_placed', cueX: info.cueX, cueY: info.cueY }); },
     stateSync: function (s) { return send({ type: 'state_sync', snapshot: s.snapshot }); },
     gameResult: function (r) { return send({ type: 'game_result', winner: r.winner, reason: r.reason, snapshot: r.snapshot }); },
+    pauseState: function (paused) { return send({ type: 'pause_state', paused: paused }); },
+    turnTimeout: function () { return send({ type: 'turn_timeout' }); },
     gameOver: function (winner, reason) { return send({ type: 'game_over', winnerSeat: winner, reason: reason }); },
     rematch: function () { return send({ type: 'rematch' }); },
     leave: function () { send({ type: 'leave' }); this.close(); },

@@ -206,7 +206,15 @@
       <div class="spin-hint">调整时瞄准已锁定 · 按 L 解锁 · 按 Space 出杆</div>
     </div>
 
-    <div class="reconnect-mask" id="reconnect-mask" hidden>
+    <div class="turn-timer" id="turn-timer" hidden><span class="turn-timer-label">本杆剩余</span><b id="turn-timer-num">45</b><span class="turn-timer-unit">秒</span></div>
+<div class="reconnect-mask" id="pause-mask" hidden>
+  <div class="reconnect-card">
+    <div class="reconnect-spin"></div>
+    <div class="reconnect-title">对方已暂停</div>
+    <div class="reconnect-sub">对手暂停了游戏，等待对方继续…</div>
+  </div>
+</div>
+<div class="reconnect-mask" id="reconnect-mask" hidden>
   <div class="reconnect-card">
     <div class="reconnect-spin"></div>
     <div class="reconnect-title">对方重连中</div>

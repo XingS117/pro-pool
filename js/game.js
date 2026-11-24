@@ -71,6 +71,8 @@
     this.onGroupAssigned = opts.onGroupAssigned || function () {};
     this.onCuePlaced = opts.onCuePlaced || function () {};
     this.onGameOver = opts.onGameOver || function () {};
+    this.onPauseChange = opts.onPauseChange || function () {};
+    this.onTurnTimeout = opts.onTurnTimeout || function () {};
     this.onGameOver = opts.onGameOver || function () {};
     this._suppressNet = false;
     this.save = opts.save || this.defaultSave();
@@ -307,6 +309,8 @@
     this.breakShot = true;
     this.openTable = true;
     this.ballInHand = false;
+    this.freeBallSeat = -1;
+    this.turnTime = 0; this._turnTimedOut = false;
     this.cuePreview = null;
     this.ballReAdjust = false;
     this.cueDragging = false;
@@ -432,7 +436,7 @@
     var pl = [];
     for (var k = 0; k < this.players.length; k++) pl.push({group: this.players[k].group || null});
     return {v: 1, balls: balls, players: pl, activePlayer: this.activePlayer,
-      openTable: !!this.openTable, ballInHand: !!this.ballInHand, breakShot: !!this.breakShot,
+      openTable: !!this.openTable, ballInHand: !!this.ballInHand, freeBallSeat: this.freeBallSeat == null ? -1 : this.freeBallSeat, breakShot: !!this.breakShot,
       shots: this.shots, shotsByPlayer: this.shotsByPlayer.slice(), fouls: this.fouls.slice(),
       matchResult: this.matchResult ? {winner: this.matchResult.winner, reason: this.matchResult.reason} : null};
   };
@@ -453,7 +457,12 @@
       this.players[k].group = s.players[k].group;
     this.activePlayer = s.activePlayer | 0;
     this.openTable = !!s.openTable;
-    this.ballInHand = !!s.ballInHand;
+    this.freeBallSeat = typeof s.freeBallSeat === 'number' ? s.freeBallSeat : -1;
+    if (this.mode === 'online' && this.freeBallSeat >= 0 && typeof this.onlineSeat === 'number') {
+      this.ballInHand = (this.onlineSeat === this.freeBallSeat);
+    } else {
+      this.ballInHand = !!s.ballInHand;
+    }
     this.breakShot = !!s.breakShot;
     if (typeof s.shots === "number") this.shots = s.shots;
     if (s.shotsByPlayer) this.shotsByPlayer = s.shotsByPlayer.slice();
@@ -899,6 +908,14 @@
     if (this.paused || this.phase === 'menu' || this.phase === 'over') return;
     dt = Math.min(dt || 0, 0.05);
     this.time += dt;
+    // 在线对战每杆限时（仅 aim 阶段且未暂停/未蓄力）
+    if (this.mode === "online" && this.phase === "aim" && !this.paused && !this._onlinePaused && !this.ballInHand) {
+      this.turnTime = (this.turnTime || 0) + dt;
+      if (this.turnTime >= 45 && !this._turnTimedOut) {
+        this._turnTimedOut = true;
+        if (!this._suppressNet) this.onTurnTimeout();
+      }
+    }
 
     if (this.charging) {
       if (this._chargeManual != null) {
@@ -1230,6 +1247,7 @@
       this.emit('toast', { text: '犯规 · ' + reason + ' · 对手自由球', type: 'foul' });
       this.activePlayer = opponentIdx;
       switched = true;
+      this.freeBallSeat = opponentIdx;
       this.enterBallInHand();
     } else if (legalPot > 0) {
       this.emit('toast', {
@@ -1256,6 +1274,7 @@
     if (!this.ballInHand) this.ensureCueSafe();
 
     if (this.audio && switched && !foul) this.audio.ui();
+    this.turnTime = 0; this._turnTimedOut = false;
     var newPlayer = this.players[this.activePlayer];
     this.emit('hud', this.getState());
     if (this._suppressNet) {
@@ -1470,8 +1489,12 @@
     this.cuePreview = null;
     // 在线对战：犯规方（当前 activePlayer 已切为对手）不是本机座位时，
     // 本机只是「等待对手摆球」——不进入自由球摆放态，避免双方都能摆球/打球。
-    var onlineWait = (this.mode === 'online' && typeof this.onlineSeat === 'number' && this.activePlayer !== this.onlineSeat);
-    this.ballInHand = !onlineWait;
+    // freeBallSeat 是全局的“谁该摆球”，不受本机视角快照影响
+    if (this.mode === "online" && typeof this.freeBallSeat === "number" && this.freeBallSeat >= 0) {
+      this.ballInHand = (this.onlineSeat === this.freeBallSeat);
+    } else {
+      this.ballInHand = !(this.mode === "online" && typeof this.onlineSeat === "number" && this.activePlayer !== this.onlineSeat);
+    }
     this.ballReAdjust = false;
     this.cueDragging = false;
     var cue = this.world && this.world.getBall('cue');
@@ -1593,6 +1616,7 @@
     this.chargeT = 0;
     this.power = 0;
     this.emit('pause', true);
+    if (this.mode === "online") this.onPauseChange(true);
     return true;
   };
 
@@ -1600,6 +1624,7 @@
     if (!this.paused) return false;
     this.paused = false;
     this.emit('pause', false);
+    if (this.mode === "online") this.onPauseChange(false);
     return true;
   };
 

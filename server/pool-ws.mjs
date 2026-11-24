@@ -146,6 +146,17 @@ wss.on('connection', (ws) => {
         for (const s of room.seats) if (s && s.connected && s.ws !== ws) send(s.ws, shot);
         break;
       }
+      case 'turn_timeout': {
+        if (!ctx || !room || !room.started) return;
+        room.turn = 1 - ctx.seat;
+        broadcast(room, { type: 'turn_timeout', seat: room.turn, by: ctx.seat });
+        break;
+      }
+      case 'pause_state': {
+        if (!ctx || !room) return;
+        for (const seat of room.seats) if (seat && seat.connected && seat.ws !== ws) send(seat.ws, { type: 'pause_state', paused: !!m.paused });
+        break;
+      }
       case 'game_result': {
         if (!ctx || !room) return;
         room.finished = true; room.busy = false;

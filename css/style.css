@@ -1930,3 +1930,14 @@ body.ingame.mode-pvp .player-card.is-idle{border-radius:11px}
 @keyframes countPulse{0%,100%{opacity:1}50%{opacity:.55}}
 .reconnect-unit{font-size:11px;color:var(--dim);margin-top:10px;letter-spacing:.5px}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+/* -------- 每杆倒计时 -------- */
+.turn-timer{position:fixed;top:78px;left:50%;transform:translateX(-50%);z-index:40;display:flex;align-items:baseline;gap:5px;padding:6px 16px;border-radius:20px;background:rgba(10,16,12,.85);border:1px solid rgba(200,164,95,.28);backdrop-filter:blur(6px);box-shadow:0 6px 18px rgba(0,0,0,.35)}
+.turn-timer[hidden]{display:none}
+.turn-timer-label{font-size:11px;color:var(--muted);letter-spacing:1px}
+.turn-timer b{font-family:var(--serif);font-size:20px;color:var(--cream);font-variant-numeric:tabular-nums;min-width:22px;text-align:center}
+.turn-timer-unit{font-size:11px;color:var(--muted)}
+.turn-timer.urgent{border-color:rgba(232,90,70,.7);background:rgba(40,12,10,.9);animation:timerPulse .8s ease-in-out infinite}
+.turn-timer.urgent b{color:#ff8a72;font-size:26px}
+.turn-timer.urgent .turn-timer-label,.turn-timer.urgent .turn-timer-unit{color:#ffb0a0}
+@keyframes timerPulse{0%,100%{transform:translateX(-50%) scale(1)}50%{transform:translateX(-50%) scale(1.06)}}
