@@ -26,7 +26,7 @@ ok('表与 HTML 坐标一致',tablePts.every(p=>btns.some(b=>b.name===p.name&&b.
    tablePts.filter(p=>!btns.some(b=>b.name===p.name&&b.x===p.x&&b.y===p.y)).map(p=>p.name).join(','));
 ok('每项都有独立效果说明',(spinTable.match(/desc:/g)||[]).length===11,'descs='+(spinTable.match(/desc:/g)||[]).length);
 ok('说明按点位精确匹配',main.indexOf('function spinPointAt')>0&&main.indexOf('var hit = spinPointAt(x, y)')>0,'');
-ok('竖屏用 4 列',css.indexOf('grid-template-columns:repeat(4,minmax(0,1fr))')>0,'');
+ok('竖屏用 6 列(与桌面对齐)',css.indexOf('grid-template-columns:repeat(6,minmax(0,1fr))')>0,'');
 console.log('PASS: '+pass+'  FAIL: '+fail);
 if(bad.length)console.log(bad.join('\n'));
 process.exit(fail?1:0);

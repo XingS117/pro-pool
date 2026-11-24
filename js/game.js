@@ -438,6 +438,7 @@
     return {v: 1, balls: balls, players: pl, activePlayer: this.activePlayer,
       openTable: !!this.openTable, ballInHand: !!this.ballInHand, freeBallSeat: this.freeBallSeat == null ? -1 : this.freeBallSeat, breakShot: !!this.breakShot,
       shots: this.shots, shotsByPlayer: this.shotsByPlayer.slice(), fouls: this.fouls.slice(),
+      turnTime: this.turnTime || 0,
       matchResult: this.matchResult ? {winner: this.matchResult.winner, reason: this.matchResult.reason} : null};
   };
 
@@ -467,6 +468,7 @@
     if (typeof s.shots === "number") this.shots = s.shots;
     if (s.shotsByPlayer) this.shotsByPlayer = s.shotsByPlayer.slice();
     if (s.fouls) this.fouls = s.fouls.slice();
+    if (typeof s.turnTime === "number") this.turnTime = s.turnTime;
     this.matchResult = s.matchResult ? {winner: s.matchResult.winner, reason: s.matchResult.reason} : null;
     this.phase = s.matchResult ? "over" : "aim";
     this.charging = false; this.ballReAdjust = false; this.cueDragging = false; this.cuePreview = null;
@@ -1165,6 +1167,7 @@
 
   /* ---------------------------------- 八球结算 ---------------------------------- */
   Game.prototype.resolveMatchShot = function () {
+    this.freeBallSeat = -1;   // 每杆先清空；仅本杆犯规才重新设置
     var ctx = this.shotCtx;
     var shooter = this.players[this.activePlayer];
     var opponentIdx = 1 - this.activePlayer;

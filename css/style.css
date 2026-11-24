@@ -1281,8 +1281,10 @@ body.ingame #btn-touch-shoot{min-width:0}
   .spin-widget{left:6px;right:6px;top:auto;bottom:6px;width:auto;transform:translateY(10px) scale(.97);padding:8px 10px}
   .spin-widget.open{transform:none}
   .spin-ball{width:68px;height:68px}
-  .spin-presets{grid-template-columns:repeat(4,minmax(0,1fr));gap:4px}
-  .spin-presets button{font-size:9px;min-height:26px;padding:4px 2px}
+  .spin-presets{grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}
+  .spin-presets button{font-size:9px;min-height:28px;padding:4px 2px;grid-column:span 2}
+  .spin-presets button.spin-wide-left{grid-column:1/4}
+  .spin-presets button.spin-wide-right{grid-column:4/7}
   /* 关卡提示是一整句长文案，必须换行居中，否则会横着冲出屏幕 */
   .toast{top:calc(max(4px,env(safe-area-inset-top)) + 86px);font-size:11.5px;
     max-width:min(88vw,336px);white-space:normal;line-height:1.45;text-align:center;
@@ -1949,3 +1951,8 @@ body.ingame.mode-pvp .player-card.is-idle{border-radius:11px}
 .pause-resume-btn{max-width:220px;margin:0 auto}
 
 .rematch-wait{text-align:center;padding:14px 18px;margin:0 0 14px;border-radius:10px;border:1px solid rgba(200,164,95,.25);background:rgba(200,164,95,.07);color:var(--muted);font-size:13px;line-height:1.6}
+
+/* mobile-angle-up: 角度条上移，离球台更近但避免误触 */
+@media (max-width: 520px) {
+  body.ingame .hud-bottom{bottom:max(24px,calc(env(safe-area-inset-bottom) + 16px))}
+}

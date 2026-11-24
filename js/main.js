@@ -751,8 +751,14 @@ command('online', function () {
       if (e) { e.preventDefault(); e.stopPropagation(); }
       dragId = null; rect = null;
       if (game.charging) {
-        game.releaseShot();
-        aimLocked = false;
+        // 0% 附近误触/轻点不算出杆：避免从 0 拉动手一抖就归零出杆
+        if ((game.power || 0) < 0.05 && typeof game.cancelCharge === "function") {
+          game.cancelCharge();
+          showToast({ text: "力度太小，未出杆", type: "info" });
+        } else {
+          game.releaseShot();
+          aimLocked = false;
+        }
         updatePowerUI(game.getState());
       }
     }
@@ -1181,7 +1187,7 @@ command('online', function () {
 
 
   /* ================================ 在线对战 ================================ */
-  var online = { active: false, version: 0, mySeat: -1, waiting: false, opponentConnected: true, reconnectTimer: null, reconnectLeft: 0, forfeited: false, pauseTimer: null, pauseLeft: 0 };
+  var online = { active: false, version: 0, mySeat: -1, waiting: false, opponentConnected: true, reconnectTimer: null, reconnectLeft: 0, forfeited: false, pauseTimer: null, pauseLeft: 0, rematchTimer: null, rematchLeft: 0 };
 
   function setOnlineStatus(text, cls) {
     var el = $('online-status'); if (!el) return;
@@ -1308,7 +1314,7 @@ command('online', function () {
       if (p.by === online.mySeat) {
         showToast({ text: "已请求再来一局 · 等待对方同意开始", type: "info" });
         var box = $("result-actions");
-        if (box) box.innerHTML = '<div class="rematch-wait">等待对方同意开始…对方未同意将等待 3 分钟</div>' + resultButton("返回主菜单", "menu", false);
+        if (box) { box.innerHTML = '<div class="rematch-wait">等待对方同意开始…<br><span id="rematch-countdown">对方未同意，等待 <b>03:00</b> 后自动断开</span></div>' + resultButton("返回主菜单", "menu", false); startRematchCountdown(); }
       } else {
         showToast({ text: "对方想再来一局", type: "info" });
         var box2 = $("result-actions");
@@ -1402,6 +1408,25 @@ command('online', function () {
     var mm = String(Math.floor(s / 60)).padStart(2, "0");
     var ss = String(s % 60).padStart(2, "0");
     if (b) b.textContent = mm + ":" + ss;
+  }
+  function startRematchCountdown() {
+    if (online.rematchTimer) clearInterval(online.rematchTimer);
+    online.rematchLeft = 180;
+    updateRematchCountdownUI();
+    online.rematchTimer = setInterval(function () {
+      online.rematchLeft--;
+      updateRematchCountdownUI();
+      if (online.rematchLeft <= 0) clearInterval(online.rematchTimer);
+    }, 1000);
+  }
+  function stopRematchCountdown() {
+    if (online.rematchTimer) { clearInterval(online.rematchTimer); online.rematchTimer = null; }
+  }
+  function updateRematchCountdownUI() {
+    var el = document.getElementById("rematch-countdown"); if (!el) return;
+    var b = el.querySelector("b"); if (!b) return;
+    var s = Math.max(0, online.rematchLeft);
+    b.textContent = String(Math.floor(s / 60)).padStart(2, "0") + ":" + String(s % 60).padStart(2, "0");
   }
   function startReconnectWait() {
     clearReconnectWait();
@@ -1728,9 +1753,12 @@ command('online', function () {
     var coinEl = $('hud-coins-value');
     if (coinEl) coinEl.textContent = (game && game.save) ? (game.save.coins || 0) : 0;
 
+    var isOnlineMode = s.mode === 'online' && typeof online.mySeat === 'number';
     for (var i = 0; i < 2; i++) {
       var p = s.players[i];
-      var card = $('player-card-' + i);
+      // 在线：本机(我)固定显示在左(card-0)，对手显示在右(card-1)
+      var cardIdx = isOnlineMode ? (i === online.mySeat ? 0 : 1) : i;
+      var card = $('player-card-' + cardIdx);
       if (!p) { card.classList.add('hidden'); continue; }
       card.classList.remove('hidden');
       var isTurn = i === s.activePlayer && s.phase !== 'over';
@@ -1738,8 +1766,8 @@ command('online', function () {
       // 双人对战最需要“现在轮到谁”：非当前回合整张卡压暗，当前回合加亮边
       card.classList.toggle('is-idle', !isTurn);
       card.classList.toggle('is-ai', !!p.isAI);
-      $('player-name-' + i).textContent = p.name;
-      $('avatar-' + i).textContent = p.short || (p.isAI ? 'AI' : '你');
+      $('player-name-' + cardIdx).textContent = isOnlineMode ? (i === online.mySeat ? '我' : '对手') : p.name;
+      $('avatar-' + cardIdx).textContent = isOnlineMode ? (i === online.mySeat ? '我' : '对手') : (p.short || (p.isAI ? 'AI' : '你'));
       var groupText = '';
       var stripNums = [];
       if (isLevel) {
@@ -1759,8 +1787,8 @@ command('online', function () {
         groupText = '待定';
         stripNums = [0, 0, 0, 0, 0, 0, 0];
       }
-      $('player-group-' + i).textContent = groupText;
-      $('balls-' + i).innerHTML = stripNums.map(ballChipHTML).join('');
+      $('player-group-' + cardIdx).textContent = groupText;
+      $('balls-' + cardIdx).innerHTML = stripNums.map(ballChipHTML).join('');
     }
 
     var activeP = s.players[s.activePlayer];
