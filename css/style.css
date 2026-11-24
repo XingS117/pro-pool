@@ -1280,7 +1280,11 @@ body.ingame #btn-touch-shoot{min-width:0}
   body.ingame #hud-coins{display:none}
   .spin-widget{left:6px;right:6px;top:auto;bottom:6px;width:auto;transform:translateY(10px) scale(.97);padding:8px 10px}
   .spin-widget.open{transform:none}
-  .spin-ball{width:68px;height:68px}
+  .spin-ball{width:100px;height:100px}
+  .spin-ring{inset:10px}
+  .spin-cross.h{left:12px;right:12px}
+  .spin-cross.v{top:12px;bottom:12px}
+  .spin-dot{width:15px;height:15px;margin:-7.5px}
   .spin-presets{grid-template-columns:repeat(6,minmax(0,1fr));gap:4px}
   .spin-presets button{font-size:9px;min-height:28px;padding:4px 2px;grid-column:span 2}
   .spin-presets button.spin-wide-left{grid-column:1/4}
@@ -1950,9 +1954,23 @@ body.ingame.mode-pvp .player-card.is-idle{border-radius:11px}
 .pause-countdown b{font-family:var(--serif);font-size:18px;color:#e8b96a;font-variant-numeric:tabular-nums;margin-left:4px}
 .pause-resume-btn{max-width:220px;margin:0 auto}
 
-.rematch-wait{text-align:center;padding:14px 18px;margin:0 0 14px;border-radius:10px;border:1px solid rgba(200,164,95,.25);background:rgba(200,164,95,.07);color:var(--muted);font-size:13px;line-height:1.6}
+.rematch-wait{flex:1 1 auto;min-width:0;text-align:center;padding:14px 18px;margin:0 8px 0 0;border-radius:10px;border:1px solid rgba(200,164,95,.25);background:rgba(200,164,95,.07);color:var(--muted);font-size:13px;line-height:1.6}
 
 /* mobile-angle-up: 角度条上移，离球台更近但避免误触 */
 @media (max-width: 520px) {
-  body.ingame .hud-bottom{bottom:max(24px,calc(env(safe-area-inset-bottom) + 16px))}
+  body.ingame .hud-bottom{bottom:max(12px,calc(env(safe-area-inset-bottom) + 8px))}
 }
+
+/* 边框清晰度增强 */
+.hud-bottom .angle-strip,.hud-bottom .power-track,.hud-bottom .angle-preset,.scoreboard .player-card{border-color:rgba(230,214,180,.42)!important}
+.scoreboard .player-card.is-active{border-color:rgba(240,200,110,.85)!important;box-shadow:0 0 0 1px rgba(240,200,110,.28),0 6px 18px rgba(0,0,0,.4)!important}
+.scoreboard .ball-strip .ball-chip{border-color:rgba(230,214,180,.55)!important;color:var(--cream)!important;background:rgba(255,255,255,.10)!important}
+.scoreboard .ball-strip .ball-chip.empty{border-color:rgba(230,214,180,.25)!important;background:rgba(0,0,0,.35)!important}
+
+/* mobile-orb-white: 手机端击球点球保持白球形象 */
+@media (max-width: 520px) {
+  body.ingame .spin-orb{background:radial-gradient(circle at 34% 28%,#fff 0%,#fbf9f2 30%,#eee8d8 62%,#cfc7b3 88%,#b6ae99 100%);border-color:rgba(240,235,220,.75);box-shadow:inset -3px -4px 8px rgba(60,55,45,.22),inset 2px 3px 6px rgba(255,255,255,.7),0 4px 12px rgba(0,0,0,.45)}
+  .spin-ball{background:radial-gradient(circle at 34% 28%,#fff 0%,#fbf9f2 30%,#eee8d8 62%,#cfc7b3 88%,#b6ae99 100%)!important}
+}
+#screen-result .result-actions{display:flex;align-items:stretch;gap:8px}
+#screen-result .result-actions button{flex:0 0 38%}

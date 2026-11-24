@@ -438,7 +438,6 @@
     return {v: 1, balls: balls, players: pl, activePlayer: this.activePlayer,
       openTable: !!this.openTable, ballInHand: !!this.ballInHand, freeBallSeat: this.freeBallSeat == null ? -1 : this.freeBallSeat, breakShot: !!this.breakShot,
       shots: this.shots, shotsByPlayer: this.shotsByPlayer.slice(), fouls: this.fouls.slice(),
-      turnTime: this.turnTime || 0,
       matchResult: this.matchResult ? {winner: this.matchResult.winner, reason: this.matchResult.reason} : null};
   };
 
@@ -468,7 +467,6 @@
     if (typeof s.shots === "number") this.shots = s.shots;
     if (s.shotsByPlayer) this.shotsByPlayer = s.shotsByPlayer.slice();
     if (s.fouls) this.fouls = s.fouls.slice();
-    if (typeof s.turnTime === "number") this.turnTime = s.turnTime;
     this.matchResult = s.matchResult ? {winner: s.matchResult.winner, reason: s.matchResult.reason} : null;
     this.phase = s.matchResult ? "over" : "aim";
     this.charging = false; this.ballReAdjust = false; this.cueDragging = false; this.cuePreview = null;

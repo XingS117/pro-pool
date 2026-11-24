@@ -114,7 +114,7 @@
         onCuePlaced: function (p) { if (online.active && Pool.Net) Pool.Net.cuePlaced(p); },
         onGameOver: function (r) { if (online.active && Pool.Net) Pool.Net.gameResult(r); },
         onPauseChange: function (p) { if (online.active && Pool.Net) Pool.Net.pauseState(p); },
-        onTurnTimeout: function () { if (online.active && Pool.Net) Pool.Net.turnTimeout(); }
+        // 超时由服务器权威判定并广播 turn_timeout；本地只标记避免重复换手
       });
     } catch (e) {
       console.error('Game init failed', e);
