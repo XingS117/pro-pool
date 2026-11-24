@@ -68,6 +68,10 @@
     // 在线对战钩子（离线模式默认空实现，行为完全不变）
     this.onLocalShot = opts.onLocalShot || function () {};
     this.onStateSettled = opts.onStateSettled || function () {};
+    this.onGroupAssigned = opts.onGroupAssigned || function () {};
+    this.onCuePlaced = opts.onCuePlaced || function () {};
+    this.onGameOver = opts.onGameOver || function () {};
+    this.onGameOver = opts.onGameOver || function () {};
     this._suppressNet = false;
     this.save = opts.save || this.defaultSave();
     this.persist = opts.persist || function () {};
@@ -415,6 +419,52 @@
   };
 
   /* ---------------------------------- 瞄准 / 击球 ---------------------------------- */
+  /* 在线对战：导出/恢复完整局面快照（重连用） */
+  Game.prototype.exportState = function () {
+    if (!this.world) return null;
+    var balls = [];
+    for (var i = 0; i < this.world.balls.length; i++) {
+      var b = this.world.balls[i];
+      balls.push({id: b.id, number: b.number, kind: b.kind, color: b.color,
+        x: +b.x.toFixed(9), y: +b.y.toFixed(9), vx: +b.vx.toFixed(9), vy: +b.vy.toFixed(9),
+        active: !!b.active, pocketed: !!b.pocketed, spinX: b.spinX || 0, spinY: b.spinY || 0, rotation: b.rotation || 0});
+    }
+    var pl = [];
+    for (var k = 0; k < this.players.length; k++) pl.push({group: this.players[k].group || null});
+    return {v: 1, balls: balls, players: pl, activePlayer: this.activePlayer,
+      openTable: !!this.openTable, ballInHand: !!this.ballInHand, breakShot: !!this.breakShot,
+      shots: this.shots, shotsByPlayer: this.shotsByPlayer.slice(), fouls: this.fouls.slice(),
+      matchResult: this.matchResult ? {winner: this.matchResult.winner, reason: this.matchResult.reason} : null};
+  };
+
+  Game.prototype.applyState = function (s) {
+    if (!s || !s.balls || !this.world) return false;
+    var byId = {};
+    for (var i = 0; i < s.balls.length; i++) byId[s.balls[i].id] = s.balls[i];
+    for (var j = 0; j < this.world.balls.length; j++) {
+      var b = this.world.balls[j], src = byId[b.id];
+      if (!src) continue;
+      b.x = src.x; b.y = src.y; b.vx = src.vx; b.vy = src.vy;
+      b.active = !!src.active; b.pocketed = !!src.pocketed;
+      b.spinX = src.spinX || 0; b.spinY = src.spinY || 0;
+      if (typeof src.rotation === "number") b.rotation = src.rotation;
+    }
+    if (s.players) for (var k = 0; k < this.players.length && k < s.players.length; k++)
+      this.players[k].group = s.players[k].group;
+    this.activePlayer = s.activePlayer | 0;
+    this.openTable = !!s.openTable;
+    this.ballInHand = !!s.ballInHand;
+    this.breakShot = !!s.breakShot;
+    if (typeof s.shots === "number") this.shots = s.shots;
+    if (s.shotsByPlayer) this.shotsByPlayer = s.shotsByPlayer.slice();
+    if (s.fouls) this.fouls = s.fouls.slice();
+    this.matchResult = s.matchResult ? {winner: s.matchResult.winner, reason: s.matchResult.reason} : null;
+    this.phase = s.matchResult ? "over" : "aim";
+    this.charging = false; this.ballReAdjust = false; this.cueDragging = false; this.cuePreview = null;
+    this.emit("hud", this.getState());
+    return true;
+  };
+
   Game.prototype.isHumanTurn = function () {
     if (this.mode === 'level') return true;
     // 在线对战：只有轮到本机座位时才允许操作（座位映射由 main.js 设置）
@@ -787,6 +837,7 @@
     this.cueDragging = false;
     this.cuePreview = null;
     this.faceNearestTarget();
+    if (!this._suppressNet) this.onCuePlaced({ cueX: cue.x, cueY: cue.y });
     this.emit('hud', this.getState());
     this.emit('toast', { text: '母球已放好 · 不满意可以再按住母球拖动调整', type: 'good' });
     if (this.audio) this.audio.ui();
@@ -979,6 +1030,11 @@
   Game.prototype.endShot = function () {
     if (this.mode === 'level') this.resolveLevelShot();
     else this.resolveMatchShot();
+    // 在线：若本端物理期间收到主机权威快照，结算后强制对齐
+    if (this.mode === "online" && this._pendingState) {
+      var s = this._pendingState; this._pendingState = null;
+      this.applyState(s);
+    }
   };
 
   /* ---------------------------------- 工具 ---------------------------------- */
@@ -1159,6 +1215,7 @@
           if (pottedObj[m].kind === group) legalPot++;
         }
         this.openTable = false;
+        if (!this._suppressNet) this.onGroupAssigned({ seat: this.activePlayer, group: group, name: shooter.name });
       }
     } else if (!foul && ctx.preGroup) {
       for (var q = 0; q < pottedObj.length; q++) {
@@ -1204,7 +1261,7 @@
     if (this._suppressNet) {
       this._suppressNet = false;
     } else {
-      this.onStateSettled({ activePlayer: this.activePlayer, over: !!this.matchResult, winner: this.matchResult ? this.matchResult.winner : null });
+      this.onStateSettled({ activePlayer: this.activePlayer, over: !!this.matchResult, winner: this.matchResult ? this.matchResult.winner : null, snapshot: this.exportState() });
     }
     this.emit('turn', {
       player: this.activePlayer,
@@ -1396,6 +1453,9 @@
     this.paused = false;
     this.emit('hud', this.getState());
     this.emit('matchOver', this.matchResult);
+    if (this.mode === "online" && !this._suppressNet && this.onGameOver) {
+      this.onGameOver({ winner: winnerIdx, reason: reason, snapshot: this.exportState() });
+    }
     if (this.audio) {
       if (this.mode === 'online') {
         // 在线：按本机座位判定，赢家放胜利音、输家放失败音

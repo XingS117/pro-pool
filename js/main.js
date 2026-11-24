@@ -109,7 +109,10 @@
         save: save,
         persist: persistSave,
         onLocalShot: function (p) { onOnlineShot(p); },
-        onStateSettled: function (s) { onOnlineSettled(s); }
+        onStateSettled: function (s) { onOnlineSettled(s); },
+        onGroupAssigned: function (g) { onOnlineGroupAssigned(g); },
+        onCuePlaced: function (p) { if (online.active && Pool.Net) Pool.Net.cuePlaced(p); },
+        onGameOver: function (r) { if (online.active && Pool.Net) Pool.Net.gameResult(r); }
       });
     } catch (e) {
       console.error('Game init failed', e);
@@ -325,7 +328,11 @@ command('online', function () {
     if (real > 0.25) real = 0.25;       // 切后台回来不要一次补上百帧
     if (real < 0) real = 0;
     if (game) {
-      var pausedLike = game.paused || game.phase === 'menu' || game.phase === 'over' || activeOverlay();
+      // 在线对战进行中（aim/shooting）不能被隐藏的菜单页挡住物理更新；
+      // 只有真正的暂停/结束屏才暂停。
+      var inOnlinePlay = game.mode === 'online' && (game.phase === 'aim' || game.phase === 'shooting');
+      var pausedLike = game.paused || game.phase === 'menu' || game.phase === 'over' ||
+        (activeOverlay() && !inOnlinePlay);
       if (pausedLike) {
         stepAcc = 0;
       } else {
@@ -1210,6 +1217,7 @@ command('online', function () {
       else showToast({ text: '房间号：' + code, type: 'info' });
     });
     Pool.Net.on('start', function (m) {
+      if (m.resumed) return;   // 重连恢复走 resume 消息，绝不能重新开局
       online.active = true; online.version = 0; online.waiting = false;
       clearReconnectWait();
       startMatch('online');
@@ -1241,6 +1249,44 @@ command('online', function () {
         game.finishMatch(online.mySeat, m && m.reason === 'timeout' ? '对手重连超时，判负' : '对手退出房间，判负');
       }
       online.active = false;
+    });
+    Pool.Net.on("group_assigned", function (g) { showGroupToast(g); });
+    Pool.Net.on("cue_placed", function (p) { onCuePlacedRemote(p); });
+    Pool.Net.on("game_result", function (r) {
+      if (!game || game.mode !== "online" || game.phase === "over") return;
+      if (r.snapshot && game.applyState) game.applyState(r.snapshot);
+      game.finishMatch(r.winner, r.reason || "对手判定");
+      refreshHud();
+    });
+    Pool.Net.on("state_sync", function (s) {
+      if (!game || game.mode !== "online" || !s.snapshot) return;
+      if (game.phase === "shooting") { game._pendingState = s.snapshot; return; }
+      game.applyState(s.snapshot);
+      refreshHud();
+    });
+    Pool.Net.on("turn_sync", function (t) {
+      if (!game || game.mode !== "online" || game.phase === "over") return;
+      if (game.activePlayer !== t.seat) {
+        game.activePlayer = t.seat;
+        refreshHud();
+      }
+    });
+
+    Pool.Net.on("resume", function (m) {
+      if (!m || m.resumed === false) return;
+      // 重连恢复：不重置局面，直接套用服务器缓存的快照
+      online.active = true; online.waiting = false;
+      online.version = m.turn || 0;
+      clearReconnectWait();
+      if (game && game.mode === "online" && m.snapshot && game.applyState) {
+        game.applyState(m.snapshot);
+        game.onlineSeat = online.mySeat;
+        showToast({ text: "已恢复对局", type: "good" });
+      } else if (game && game.mode !== "online") {
+        startMatch("online");
+        game.onlineSeat = online.mySeat;
+      }
+      refreshHud();
     });
     Pool.Net.on('opponent_reconnected', function (m) {
       clearReconnectWait(); online.opponentConnected = true;
@@ -1274,15 +1320,35 @@ command('online', function () {
     if (game) game._onlinePaused = false;
     var mask = $('reconnect-mask'); if (mask) mask.hidden = true;
   }
+  function onCuePlacedRemote(p) {
+    if (!game || game.mode !== "online" || game.phase !== "aim") return;
+    var cue = game.world && game.world.getBall("cue");
+    if (!cue) return;
+    cue.x = p.cueX; cue.y = p.cueY; cue.vx = 0; cue.vy = 0;
+    cue.active = true; cue.pocketed = false; cue.pocketIndex = null;
+    game.ballInHand = false; game.ballReAdjust = false;
+    game.emit("hud", game.getState());
+    showToast({ text: "对手已摆放母球", type: "info" });
+  }
+  function onOnlineGroupAssigned(g) {
+    if (!online.active || !Pool.Net) return;
+    Pool.Net.groupAssigned(g);
+    showGroupToast(g);
+  }
+  function showGroupToast(g) {
+    var mine = (g.seat === online.mySeat);
+    var gname = g.group === "solid" ? "全色球（1-7）" : "花色球（9-15）";
+    showToast({ text: (mine ? "你" : "对手") + "打" + gname + " · 球组已确定", type: "good" });
+  }
   function onOnlineShot(p) {
     if (!online.active || !Pool.Net) return;
     online.version++;
-    Pool.Net.sendShot({ version: online.version - 1, angle: p.angle, power: p.power, spinX: p.spinX, spinY: p.spinY, cueX: p.cueX, cueY: p.cueY });
+    Pool.Net.sendShot({ version: online.version - 1, angle: p.angle, power: p.power, spinX: p.spinX, spinY: p.spinY, cueX: p.cueX, cueY: p.cueY, snapshot: game && game.exportState ? game.exportState() : null });
   }
   function onOnlineSettled(s) {
     if (!online.active || !Pool.Net) return;
     if (s.over) Pool.Net.gameOver(s.winner != null ? s.winner : online.mySeat, '清台');
-    else Pool.Net.swap(s.activePlayer);
+    else { Pool.Net.swap(s.activePlayer); if (s.snapshot) Pool.Net.stateSync(s); }
   }
 
   /* ---------------------------------- 操作分发 ---------------------------------- */

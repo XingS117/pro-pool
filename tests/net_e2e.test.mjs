@@ -9,7 +9,7 @@ const WebSocket = require('../server/node_modules/ws');
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PORT = 18788;
 const proc = spawn(process.execPath, [path.join(ROOT,'server','pool-ws.mjs')], {
-  env:{...process.env,POOL_WS_PORT:String(PORT),POOL_WS_HOST:'127.0.0.1'}, stdio:['ignore','pipe','pipe'] });
+  env:{...process.env,POOL_WS_PORT:String(PORT),POOL_WS_HOST:'127.0.0.1',POOL_WS_NO_BUSY:'1'}, stdio:['ignore','pipe','pipe'] });
 let pass=0,fail=0; const bad=[];
 function ok(n,c,d){if(c)pass++;else{fail++;bad.push(n+' :: '+(d||''));}}
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));

@@ -8,6 +8,7 @@ import { randomInt } from 'node:crypto';
 const PORT = Number(process.env.POOL_WS_PORT || 8787);
 const HOST = process.env.POOL_WS_HOST || '127.0.0.1';
 const WAIT_TTL = 30 * 60 * 1000;      // 等待中房间 30 分钟
+const NO_BUSY = process.env.POOL_WS_NO_BUSY === "1"; // 测试环境可关闭串行锁
 const DISCONNECT_TTL = Number(process.env.POOL_WS_DISCONNECT_TTL || 60) * 1000; // 掉线重连窗口（默认 60 秒）
 const REMATCH_TTL = 60 * 1000;        // 对局结束再来一局窗口 60 秒
 const EMPTY_TTL = 30 * 1000;          // 空房间 30 秒
@@ -54,6 +55,7 @@ function roomTick() {
         destroyRoom(code);
       }
     }
+    if (room.busy && room.busySince && now - room.busySince > 6000) { room.busy = false; room.busySince = null; }
     if (room.finished && room.rematchUntil && now > room.rematchUntil) destroyRoom(code);
     if (!room.started && now - room.createdAt > WAIT_TTL) destroyRoom(code);
   }
@@ -122,7 +124,7 @@ wss.on('connection', (ws) => {
           }
         }
         send(ws, { type: 'room_joined', code, seat: idx, seatCode: seat.seatCode, opponent: '对手' });
-        if (r.started) send(ws, { type: 'start', firstPlayer: 0, resumed: true, turn: r.turn, lastShot: r.lastShot });
+        if (r.started) send(ws, { type: 'resume', turn: r.turn, snapshot: r.snapshot, lastShot: r.lastShot });
         break;
       }
       case 'shot': {
@@ -130,21 +132,48 @@ wss.on('connection', (ws) => {
         if (ctx.seat !== room.turn) return err(ws, 'NOT_YOUR_TURN', '还没轮到你');
         if (m.version !== room.version) return err(ws, 'BAD_VERSION', '版本过期，请等待同步');
         if (!validShot(m, room)) return err(ws, 'BAD_SHOT', '出杆参数越界');
+        if (!NO_BUSY && room.busy) return err(ws, 'BUSY', '上一杆结算中，请稍候');
         const now = Date.now();
+        if (!NO_BUSY) { room.busy = true; room.busySince = Date.now(); }
         if (now - lastShotAt < 300) return err(ws, 'TOO_FAST', '出杆过快');
         lastShotAt = now;
         const shot = { type: 'opponent_shot', version: room.version, angle: m.angle, power: m.power,
           spinX: m.spinX, spinY: m.spinY, cueX: m.cueX ?? null, cueY: m.cueY ?? null };
+        if (m.snapshot) room.snapshot = m.snapshot;
         room.lastShot = shot;
         room.version++;
         // 换手由客户端结算后上报 swap（进球不换手 / 犯规换手等规则在客户端）
         for (const s of room.seats) if (s && s.connected && s.ws !== ws) send(s.ws, shot);
         break;
       }
+      case 'game_result': {
+        if (!ctx || !room) return;
+        room.finished = true; room.busy = false;
+        for (const seat of room.seats) if (seat && seat.connected && seat.ws !== ws) send(seat.ws, { type: 'game_result', winner: m.winner, reason: m.reason, snapshot: m.snapshot });
+        break;
+      }
+      case 'state_sync': {
+        if (!ctx || !room || !m.snapshot) return;
+        room.busy = false;
+        for (const seat of room.seats) if (seat && seat.connected && seat.ws !== ws) send(seat.ws, { type: 'state_sync', snapshot: m.snapshot });
+        break;
+      }
+      case 'cue_placed': {
+        if (!ctx || !room) return;
+        for (const seat of room.seats) if (seat && seat.connected && seat.ws !== ws) send(seat.ws, { type: 'cue_placed', cueX: m.cueX, cueY: m.cueY });
+        break;
+      }
+      case 'group_assigned': {
+        if (!ctx || !room) return;
+        broadcast(room, { type: 'group_assigned', seat: m.seat, group: m.group, name: m.name || '' });
+        break;
+      }
       case 'swap': {
         if (!ctx || !room || !room.started) return;
         if (typeof m.seat === 'number' && (m.seat === 0 || m.seat === 1)) room.turn = m.seat;
         else room.turn = 1 - ctx.seat;
+        // 广播权威回合给双方，强制对齐（犯规换手两端可能不一致）
+        broadcast(room, { type: 'turn_sync', seat: room.turn });
         break;
       }
       case 'game_over': {

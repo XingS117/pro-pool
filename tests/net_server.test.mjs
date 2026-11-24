@@ -8,7 +8,7 @@ import { fileURLToPath } from 'node:url';
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const PORT = 18787;
 const proc = spawn(process.execPath, [path.join(ROOT, 'server', 'pool-ws.mjs')], {
-  env: { ...process.env, POOL_WS_PORT: String(PORT), POOL_WS_HOST: '127.0.0.1' },
+  env: { ...process.env, POOL_WS_PORT: String(PORT), POOL_WS_HOST: '127.0.0.1', POOL_WS_NO_BUSY: '1' },
   stdio: ['ignore','pipe','pipe']
 });
 let pass = 0, fail = 0; const bad = [];
@@ -90,7 +90,7 @@ try {
   B.send({ type: 'rejoin', code, seatCode });
   const rejoined = await B.next(m => m.type === 'room_joined');
   ok('重连恢复座位 1', rejoined.seat === 1, String(rejoined.seat));
-  const resumed = await B.next(m => m.type === 'start');
+  const resumed = await B.next(m => m.type === 'resume');
   ok('重连补发 lastShot', !!resumed.lastShot && resumed.lastShot.angle === 0.2, JSON.stringify(resumed));
   // 9) 对局结束 + rematch
   A.send({ type: 'game_over', winnerSeat: 0, reason: '清台' });
