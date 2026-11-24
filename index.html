@@ -211,7 +211,9 @@
   <div class="reconnect-card">
     <div class="reconnect-spin"></div>
     <div class="reconnect-title">对方已暂停</div>
-    <div class="reconnect-sub">对手暂停了游戏，等待对方继续…</div>
+    <div class="reconnect-sub">对手暂停了游戏。你可以等待，也可以直接恢复游戏。</div>
+    <div class="pause-countdown" id="pause-countdown">距自动断开还有 <b>03:00</b></div>
+    <button class="online-primary pause-resume-btn" id="pause-resume-btn">恢复游戏</button>
   </div>
 </div>
 <div class="reconnect-mask" id="reconnect-mask" hidden>
@@ -443,6 +445,7 @@
         <span class="modal-kicker">PAUSED</span>
         <h2>暂停</h2>
         <p class="modal-sub">球局已暂停。调整一下呼吸，再继续。</p>
+        <p class="pause-notice">游戏暂停时间最长不超过 3 分钟，且对方有权恢复游戏。</p>
         <div class="modal-actions vertical">
           <button class="btn-primary" data-action="resume">继续球局</button>
           <button class="btn-ghost" data-action="restart">重新开始</button>

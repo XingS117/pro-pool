@@ -14,7 +14,7 @@ const nodeTests = [
   'tests/ai_e2e_hard.js','tests/full_audit.js',
   'tests/net_server.test.mjs','tests/net_e2e.test.mjs'
 ];
-const pyTests = ['tests/e2e_acceptance.py','tests/soak.py','tests/browser_audit.py','tests/spin_ui_audit.py','tests/ghost_ball_ui.py','tests/cross_browser.test.py','tests/three_features.py','tests/auto_reconnect_verify.py','tests/result_verify.py','tests/repro_foul.py'];
+const pyTests = ['tests/e2e_acceptance.py','tests/soak.py','tests/browser_audit.py','tests/spin_ui_audit.py','tests/ghost_ball_ui.py','tests/cross_browser.test.py','tests/pause_mechanism.py','tests/three_features.py','tests/auto_reconnect_verify.py','tests/result_verify.py','tests/repro_foul.py'];
 let fail = 0;
 function run(cmd, args, label) {
   const r = spawnSync(cmd, args, { cwd: root, encoding: 'utf8', timeout: 300000 });

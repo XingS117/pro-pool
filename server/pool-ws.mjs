@@ -8,6 +8,7 @@ import { randomInt } from 'node:crypto';
 const PORT = Number(process.env.POOL_WS_PORT || 8787);
 const HOST = process.env.POOL_WS_HOST || '127.0.0.1';
 const WAIT_TTL = 30 * 60 * 1000;      // 等待中房间 30 分钟
+const PAUSE_TIMEOUT_MS = Number(process.env.POOL_WS_PAUSE_TIMEOUT_MS || 180000); // 暂停超时（默认3分钟）
 const NO_BUSY = process.env.POOL_WS_NO_BUSY === "1"; // 测试环境可关闭串行锁
 const DISCONNECT_TTL = Number(process.env.POOL_WS_DISCONNECT_TTL || 60) * 1000; // 掉线重连窗口（默认 60 秒）
 const REMATCH_TTL = 60 * 1000;        // 对局结束再来一局窗口 60 秒
@@ -30,7 +31,8 @@ function send(ws, obj) {
 function err(ws, code, message) { send(ws, { type: 'error', code, message }); }
 function newRoom(code) {
   return { code, seats: [null, null], started: false, turn: 0, version: 0,
-    lastShot: null, createdAt: Date.now(), emptySince: null, rematchUntil: null, finished: false };
+    lastShot: null, createdAt: Date.now(), emptySince: null, rematchUntil: null, finished: false,
+    pausedAt: null, pausedBy: -1 };
 }
 function getRoom(code) { return rooms.get(code) || null; }
 function destroyRoom(code) { rooms.delete(code); }
@@ -56,6 +58,12 @@ function roomTick() {
       }
     }
     if (room.busy && room.busySince && now - room.busySince > 6000) { room.busy = false; room.busySince = null; }
+    // 暂停超过 3 分钟：判非暂停方胜（暂停方弃权）
+    if (room.pausedAt && room.pausedBy >= 0 && now - room.pausedAt > PAUSE_TIMEOUT_MS && !room.finished) {
+      const winner = 1 - room.pausedBy;
+      room.finished = true; room.pausedAt = null;
+      broadcast(room, { type: 'pause_timeout', winner: winner, reason: '暂停超过 3 分钟，判暂停方弃权' });
+    }
     if (room.finished && room.rematchUntil && now > room.rematchUntil) destroyRoom(code);
     if (!room.started && now - room.createdAt > WAIT_TTL) destroyRoom(code);
   }
@@ -154,7 +162,17 @@ wss.on('connection', (ws) => {
       }
       case 'pause_state': {
         if (!ctx || !room) return;
-        for (const seat of room.seats) if (seat && seat.connected && seat.ws !== ws) send(seat.ws, { type: 'pause_state', paused: !!m.paused });
+        if (m.paused) { room.pausedAt = Date.now(); room.pausedBy = ctx.seat; }
+        else { room.pausedAt = null; room.pausedBy = -1; }
+        for (const seat of room.seats) if (seat && seat.connected && seat.ws !== ws)
+          send(seat.ws, { type: 'pause_state', paused: !!m.paused, by: ctx.seat });
+        break;
+      }
+      case 'force_resume': {
+        // 非暂停方强制恢复：只有对方能按，转发给暂停方令其解除暂停
+        if (!ctx || !room || room.pausedBy < 0 || ctx.seat === room.pausedBy) return;
+        const pauser = room.seats[room.pausedBy];
+        if (pauser && pauser.connected) send(pauser.ws, { type: 'force_resume' });
         break;
       }
       case 'game_result': {

@@ -1172,7 +1172,7 @@ command('online', function () {
 
 
   /* ================================ 在线对战 ================================ */
-  var online = { active: false, version: 0, mySeat: -1, waiting: false, opponentConnected: true, reconnectTimer: null, reconnectLeft: 0, forfeited: false };
+  var online = { active: false, version: 0, mySeat: -1, waiting: false, opponentConnected: true, reconnectTimer: null, reconnectLeft: 0, forfeited: false, pauseTimer: null, pauseLeft: 0 };
 
   function setOnlineStatus(text, cls) {
     var el = $('online-status'); if (!el) return;
@@ -1211,6 +1211,17 @@ command('online', function () {
         if (inp) inp.value = '';   // 用过的房间号立即清空，避免下次残留
         refreshOnlineUI();
       }).catch(function () { setOnlineStatus('连接失败', 'err'); });
+    });
+    var prb = document.getElementById("pause-resume-btn");
+    if (prb) prb.addEventListener("click", function () {
+      if (audio) audio.ui();
+      if (Pool.Net) Pool.Net.forceResume();
+      // 本地立即恢复（对方也会收到 pause_state false）
+      stopPauseCountdown();
+      var mask = document.getElementById("pause-mask"); if (mask) mask.hidden = true;
+      if (game) game._onlinePaused = false;
+      showToast({ text: "已恢复游戏", type: "good" });
+      refreshHud();
     });
     var copy = $('online-copy');
     if (copy) copy.addEventListener('click', function () {
@@ -1261,15 +1272,35 @@ command('online', function () {
       showToast({ text: "本杆超时 · 自动换手", type: "foul" });
       refreshHud();
     });
+    Pool.Net.on("force_resume", function () {
+      if (!game || game.mode !== "online") return;
+      if (game.paused) game.resume();  // 会触发 onPauseChange(false) 广播给对方
+      showToast({ text: "对方恢复了游戏", type: "info" });
+    });
     Pool.Net.on("pause_state", function (p) {
       if (!game || game.mode !== "online") return;
-      var mask = document.getElementById("pause-mask");
+      var mask = document.getElementById('pause-mask');
       if (p.paused) {
+        var by = (typeof p.by === 'number') ? p.by : -1;
+        if (by === online.mySeat) return; // 自己暂停不弹对方遮罩
+        online.pausedBySeat = by;
         if (mask) mask.hidden = false;
         game._onlinePaused = true;
+        startPauseCountdown();
       } else {
+        stopPauseCountdown();
         if (mask) mask.hidden = true;
         if (!online.reconnectTimer) game._onlinePaused = false;
+      }
+      refreshHud();
+    });
+    Pool.Net.on("pause_timeout", function (t) {
+      stopPauseCountdown();
+      var mask = document.getElementById("pause-mask"); if (mask) mask.hidden = true;
+      if (game && game.mode === "online" && game.phase !== "over") {
+        if (game.paused) game.resume();
+        game._onlinePaused = false;
+        game.finishMatch(t.winner, t.reason || "暂停超时");
       }
       refreshHud();
     });
@@ -1316,6 +1347,27 @@ command('online', function () {
     });
     Pool.Net.on('game_over', function (m) { showToast({ text: '对局结束', type: 'info' }); });
     Pool.Net.on('error', function (m) { setOnlineStatus((m.code || 'ERR') + ': ' + (m.message || ''), 'err'); });
+  }
+  function startPauseCountdown() {
+    stopPauseCountdown();
+    online.pauseLeft = 180;
+    updatePauseCountdownUI();
+    online.pauseTimer = setInterval(function () {
+      online.pauseLeft--;
+      updatePauseCountdownUI();
+      if (online.pauseLeft <= 0) stopPauseCountdown();
+    }, 1000);
+  }
+  function stopPauseCountdown() {
+    if (online.pauseTimer) { clearInterval(online.pauseTimer); online.pauseTimer = null; }
+  }
+  function updatePauseCountdownUI() {
+    var el = document.getElementById("pause-countdown"); if (!el) return;
+    var b = el.querySelector("b");
+    var s = Math.max(0, online.pauseLeft);
+    var mm = String(Math.floor(s / 60)).padStart(2, "0");
+    var ss = String(s % 60).padStart(2, "0");
+    if (b) b.textContent = mm + ":" + ss;
   }
   function startReconnectWait() {
     clearReconnectWait();
