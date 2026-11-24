@@ -771,6 +771,8 @@
 
   Game.prototype.placeCueAt = function (x, y) {
     if (this.phase !== 'aim' || !this.ballInHand || this.paused) return false;
+    // 在线对战：摆自由球也必须轮到自己（防止非回合方抢摆）
+    if (!this.isHumanTurn()) return false;
     if (!this.isValidCuePos(x, y)) return false;
     var cue = this.world.getBall('cue');
     if (!cue) return false;
@@ -1202,7 +1204,7 @@
     if (this._suppressNet) {
       this._suppressNet = false;
     } else {
-      this.onStateSettled({ activePlayer: this.activePlayer, over: !!this.matchResult });
+      this.onStateSettled({ activePlayer: this.activePlayer, over: !!this.matchResult, winner: this.matchResult ? this.matchResult.winner : null });
     }
     this.emit('turn', {
       player: this.activePlayer,
@@ -1395,7 +1397,10 @@
     this.emit('hud', this.getState());
     this.emit('matchOver', this.matchResult);
     if (this.audio) {
-      if (this.mode === 'pvp' || this.mode === 'online' || humanWon) this.audio.win();
+      if (this.mode === 'online') {
+        // 在线：按本机座位判定，赢家放胜利音、输家放失败音
+        if (winnerIdx === this.onlineSeat) this.audio.win(); else this.audio.lose();
+      } else if (this.mode === 'pvp' || humanWon) this.audio.win();
       else this.audio.lose();
     }
   };
@@ -1403,7 +1408,10 @@
   Game.prototype.enterBallInHand = function () {
     this._aimSnap = null;
     this.cuePreview = null;
-    this.ballInHand = true;
+    // 在线对战：犯规方（当前 activePlayer 已切为对手）不是本机座位时，
+    // 本机只是「等待对手摆球」——不进入自由球摆放态，避免双方都能摆球/打球。
+    var onlineWait = (this.mode === 'online' && typeof this.onlineSeat === 'number' && this.activePlayer !== this.onlineSeat);
+    this.ballInHand = !onlineWait;
     this.ballReAdjust = false;
     this.cueDragging = false;
     var cue = this.world && this.world.getBall('cue');

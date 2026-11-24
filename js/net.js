@@ -6,7 +6,7 @@
   var Pool = (window.Pool = window.Pool || {});
   var listeners = {};
   var ws = null, roomCode = '', seat = -1, seatCode = '';
-  var pending = [], connected = false;
+  var pending = [], connected = false, manualClose = false, autoRetry = null;
   function emit(ev, data) { (listeners[ev] || []).forEach(function (fn) { try { fn(data); } catch (e) {} }); }
   function endpoint() {
     if (window.__POOL_WS_URL__) return window.__POOL_WS_URL__;
@@ -19,9 +19,20 @@
   function connect() {
     return new Promise(function (resolve, reject) {
       if (ws && ws.readyState === 1) return resolve();
+      manualClose = false;
       try { ws = new WebSocket(endpoint()); } catch (e) { return reject(e); }
       ws.onopen = function () { connected = true; emit('connection', { connected: true }); resolve(); };
-      ws.onclose = function () { connected = false; emit('connection', { connected: false }); };
+      ws.onclose = function () {
+        connected = false; emit('connection', { connected: false });
+        // 非主动关闭且曾在房间中：自动用座位码重连（切页面/网络波动场景）
+        if (!manualClose && roomCode && seatCode && !autoRetry) {
+          emit('auto_reconnecting', { code: roomCode });
+          autoRetry = setTimeout(function () {
+            autoRetry = null;
+            if (!manualClose && roomCode && seatCode) { Pool.Net.rejoin(roomCode, seatCode).catch(function () {}); }
+          }, 800);
+        }
+      };
       ws.onerror = function (e) { emit('error', { code: 'WS_ERROR', message: '连接失败' }); reject(e); };
       ws.onmessage = function (ev) {
         var m; try { m = JSON.parse(ev.data); } catch (e) { return; }
@@ -51,7 +62,8 @@
     gameOver: function (winner, reason) { return send({ type: 'game_over', winnerSeat: winner, reason: reason }); },
     rematch: function () { return send({ type: 'rematch' }); },
     leave: function () { send({ type: 'leave' }); this.close(); },
-    close: function () { if (ws) { try { ws.close(); } catch (e) {} } ws = null; connected = false; },
+    drop: function () { /* 模拟网络闪断：断底层连接但保留座位，触发自动重连 */ if (ws) { try { ws.close(); } catch (e) {} } },
+    close: function () { manualClose = true; if (autoRetry) { clearTimeout(autoRetry); autoRetry = null; } if (ws) { try { ws.close(); } catch (e) {} } ws = null; connected = false; roomCode = ''; seatCode = ''; },
     on: function (ev, fn) { return sub(ev, fn); },
     off: function (ev, fn) { return unsub(ev, fn); },
     get state() { return { roomCode: roomCode, seat: seat, seatCode: seatCode, connected: connected }; }

@@ -1281,7 +1281,7 @@ command('online', function () {
   }
   function onOnlineSettled(s) {
     if (!online.active || !Pool.Net) return;
-    if (s.over) Pool.Net.gameOver(1 - online.mySeat, '清台');
+    if (s.over) Pool.Net.gameOver(s.winner != null ? s.winner : online.mySeat, '清台');
     else Pool.Net.swap(s.activePlayer);
   }
 
@@ -2079,14 +2079,16 @@ command('online', function () {
       hideAllScreens();
       syncBodyState();
       var isAI = game.mode === 'ai';
-      var humanWon = res.winner === 0;
-      var lose = isAI && !humanWon;
+      var isOnline = game.mode === 'online';
+      var humanWon = isOnline ? (res.winner === online.mySeat) : (res.winner === 0);
+      var lose = (isAI || isOnline) && !humanWon;
       var modal = document.querySelector('#screen-result .modal');
       modal.classList.toggle('result-lose', lose);
       $('result-kicker').textContent = lose ? 'MATCH COMPLETE · DEFEAT' : 'MATCH COMPLETE';
-      if (!isAI) $('result-title').textContent = res.winnerName + ' 获胜';
+      if (isOnline) $('result-title').textContent = humanWon ? '你获胜了' : '你输了';
+      else if (!isAI) $('result-title').textContent = res.winnerName + ' 获胜';
       else $('result-title').textContent = humanWon ? '你赢下了这局' : '惜败一局';
-      $('result-sub').textContent = (res.reason || '') + (isAI ? ' · 机器人 ' + (humanWon ? '承认了这局的差距' : '把握住了机会') : ' · 一场势均力敌的较量');
+      $('result-sub').textContent = (res.reason || '') + (isOnline ? (humanWon ? ' · 干得漂亮' : ' · 再来一局扳回来') : (isAI ? ' · 机器人 ' + (humanWon ? '承认了这局的差距' : '把握住了机会') : ' · 一场势均力敌的较量'));
       $('result-stars').innerHTML = '';
       var totalShots = (res.shots || []).reduce(function (a, b) { return a + b; }, 0);
       var totalFouls = (res.fouls || []).reduce(function (a, b) { return a + b; }, 0);
