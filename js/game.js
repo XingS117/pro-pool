@@ -911,7 +911,7 @@
     dt = Math.min(dt || 0, 0.05);
     this.time += dt;
     // 在线对战每杆限时（仅 aim 阶段且未暂停/未蓄力）
-    if (this.mode === "online" && this.phase === "aim" && !this.paused && !this._onlinePaused && !this.ballInHand) {
+    if (this.mode === "online" && this.phase === "aim" && !this.paused && !this._onlinePaused) {
       this.turnTime = (this.turnTime || 0) + dt;
       if (this.turnTime >= 45 && !this._turnTimedOut) {
         this._turnTimedOut = true;
@@ -1462,7 +1462,8 @@
     } else if (this.mode === 'pvp' || this.mode === 'online') {
       // 本地双人共用一份存档：胜者加金币，败者不扣
       // pvp 本地共用存档：谁赢都给这份存档加金币；online 只有本机座位赢才加
-      coinsDelta = (this.mode === "online" && winnerIdx !== this.onlineSeat) ? 0 : eco.pvpWin;
+      if (this.mode === "online" && winnerIdx !== this.onlineSeat) coinsDelta = -Math.round(eco.pvpWin / 2);
+      else coinsDelta = eco.pvpWin;
       coins = this.applyCoins(coinsDelta);
       this.persist(this.save);
       this.emit('save', this.save);

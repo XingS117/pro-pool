@@ -362,7 +362,21 @@ command('online', function () {
   /* ---------------------------------- 事件绑定 ---------------------------------- */
   function bindGameEvents() {
     game.on('hud', function () { refreshHud(); });
-    game.on('toast', showToast);
+    game.on('toast', function (t) {
+      if (game && game.mode === 'online' && online.active && t && typeof t.text === 'string') {
+        var txt = t.text;
+        // 自由球 toast 在换手前 emit，归属是 1 - activePlayer；
+        // 轮到 toast 在换手后 emit，归属是 activePlayer。
+        var freeWho = ((1 - game.activePlayer) === online.mySeat) ? '你' : '对手';
+        var turnWho = (game.activePlayer === online.mySeat) ? '你' : '对手';
+        // 显示层按本机视角校正：两端 activePlayer 已同步，避免 Game 层结算时序差异导致双方都显示“对手”
+        if (txt.indexOf('轮到 ') >= 0) txt = txt.replace(/轮到 (?:你|对手)/, '轮到 ' + turnWho);
+        if (txt.indexOf('自由球') >= 0) txt = txt.replace(/(?:你|对手)自由球/, freeWho + '自由球');
+        showToast({ text: txt, type: t.type });
+        return;
+      }
+      showToast(t);
+    });
     game.on('turn', onTurn);
     game.on('spin', function (d) { setSpinUI(d.x, d.y); });
     game.on('guide', function (on) { updateGuideButton(on); });
@@ -1284,6 +1298,7 @@ command('online', function () {
       if (!game || game.mode !== "online") return;
       game.activePlayer = t.seat;
       game.turnTime = 0; game._turnTimedOut = false;
+      game.ballInHand = false; game.freeBallSeat = -1; game.ballReAdjust = false;
       showToast({ text: "本杆超时 · 自动换手", type: "foul" });
       refreshHud();
     });
@@ -1799,6 +1814,7 @@ command('online', function () {
     else if (activeP) {
       if (s.mode === 'pvp') turnText = (isTouchDevice ? (activeP.short || 'P1') : activeP.name) + ' 回合';
       else if (activeP.isAI) turnText = s.aiThinking ? '思考中…' : 'AI 回合';
+      else if (isOnlineMode) turnText = (activeP && activeP.isAI) ? '—' : ((s.activePlayer === online.mySeat) ? (s.phase === 'shooting' ? '你击球中' : '你的回合') : (s.phase === 'shooting' ? '对手击球中' : '对手回合'));
       else turnText = s.phase === 'shooting' ? '击球中…' : '你的回合';
     }
     $('turn-label').textContent = turnText;
