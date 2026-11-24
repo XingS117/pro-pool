@@ -1947,3 +1947,5 @@ body.ingame.mode-pvp .player-card.is-idle{border-radius:11px}
 .pause-countdown{margin:14px 0 16px;font-size:12px;color:var(--muted)}
 .pause-countdown b{font-family:var(--serif);font-size:18px;color:#e8b96a;font-variant-numeric:tabular-nums;margin-left:4px}
 .pause-resume-btn{max-width:220px;margin:0 auto}
+
+.rematch-wait{text-align:center;padding:14px 18px;margin:0 0 14px;border-radius:10px;border:1px solid rgba(200,164,95,.25);background:rgba(200,164,95,.07);color:var(--muted);font-size:13px;line-height:1.6}

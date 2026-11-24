@@ -460,7 +460,16 @@ command('online', function () {
     command('help', function () { showScreen('help'); });
     command('levels', function () { refreshLevels(); showScreen('levels'); });
     command('menu', function () { showMenu(); });
-    command('rematch', function () { startMatch(game.mode === 'level' ? 'ai' : game.mode, game.difficulty); });
+    command('rematch', function () {
+  if (game && game.mode === 'online' && online.active && Pool.Net) {
+    Pool.Net.rematch();
+    showToast({ text: '已请求再来一局 · 等待对方同意开始', type: 'info' });
+    var box = $('result-actions');
+    if (box) box.innerHTML = '<div class="rematch-wait">等待对方同意开始…</div>' + resultButton('返回主菜单', 'menu', false);
+    return;
+  }
+  startMatch(game.mode === 'level' ? 'ai' : game.mode, game.difficulty);
+});
     command('restart', function () { restartGame(); });
     command('quit', function () { showMenu(); });
     command('resume', function () { resumeGame(); });
@@ -1294,6 +1303,31 @@ command('online', function () {
       }
       refreshHud();
     });
+    Pool.Net.on("rematch_pending", function (p) {
+      if (!game || game.mode !== "online") return;
+      if (p.by === online.mySeat) {
+        showToast({ text: "已请求再来一局 · 等待对方同意开始", type: "info" });
+        var box = $("result-actions");
+        if (box) box.innerHTML = '<div class="rematch-wait">等待对方同意开始…对方未同意将等待 3 分钟</div>' + resultButton("返回主菜单", "menu", false);
+      } else {
+        showToast({ text: "对方想再来一局", type: "info" });
+        var box2 = $("result-actions");
+        if (box2) box2.innerHTML = resultButton("同意再来一局", "rematch", true) + resultButton("返回主菜单", "menu", false);
+      }
+    });
+    Pool.Net.on("rematch_cancelled", function () {
+      showToast({ text: "对方取消了再来一局", type: "info" });
+    });
+    Pool.Net.on("room_closed", function (m) {
+      stopPauseCountdown();
+      var pm = document.getElementById("pause-mask"); if (pm) pm.hidden = true;
+      if (game && game.mode === "online") {
+        game._onlinePaused = false;
+        if (game.phase !== "over") game.finishMatch(1 - online.mySeat, (m && m.reason) || "房间已断开");
+      }
+      online.active = false;
+      showToast({ text: (m && m.reason) || "房间已断开", type: "foul" });
+    });
     Pool.Net.on("pause_timeout", function (t) {
       stopPauseCountdown();
       var mask = document.getElementById("pause-mask"); if (mask) mask.hidden = true;
@@ -1810,7 +1844,10 @@ command('online', function () {
     el.hidden = false;
     var n = Math.ceil(left);
     var num = $("turn-timer-num");
-    if (num && num.textContent !== String(n)) num.textContent = String(n);
+    if (num && num.textContent !== String(n)) {
+      num.textContent = String(n);
+      if (audio && audio.tick) audio.tick();   // 读秒提示音
+    }
     el.classList.toggle("urgent", left <= 5);
   }
 

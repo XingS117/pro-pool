@@ -97,8 +97,11 @@ try {
   const over = await B.next(m => m.type === 'game_over');
   ok('对局结束广播', over.winnerSeat === 0, JSON.stringify(over));
   A.send({ type: 'rematch' });
+  const pend = await B.next(m => m.type === 'rematch_pending');
+  ok('再来一局需对方同意', pend.by === 0, JSON.stringify(pend));
+  B.send({ type: 'rematch' });
   const re1 = await A.next(m => m.type === 'start');
-  ok('再来一局沿用原房间号', re1.rematch === true && re1.firstPlayer === 0, JSON.stringify(re1));
+  ok('双方同意后重开沿用房间号', re1.rematch === true && re1.firstPlayer === 0, JSON.stringify(re1));
   // leave：用全新房间测试，避免前面消息干扰
   const D = await open(), E = await open();
   D.send({ type: 'create_room' });

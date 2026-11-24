@@ -1244,7 +1244,7 @@
     var switched = false;
     if (foul) {
       this.fouls[this.activePlayer] = (this.fouls[this.activePlayer] || 0) + 1;
-      this.emit('toast', { text: '犯规 · ' + reason + ' · 对手自由球', type: 'foul' });
+      var foulWho = (this.mode === 'online' && typeof this.onlineSeat === 'number') ? (opponentIdx === this.onlineSeat ? '你' : '对手') : '对手'; this.emit('toast', { text: '犯规 · ' + reason + ' · ' + foulWho + '自由球', type: 'foul' });
       this.activePlayer = opponentIdx;
       switched = true;
       this.freeBallSeat = opponentIdx;
@@ -1258,8 +1258,11 @@
     } else {
       this.activePlayer = opponentIdx;
       switched = true;
+        var who = (this.mode === "online" && typeof this.onlineSeat === "number")
+          ? (opponentIdx === this.onlineSeat ? "你" : "对手")
+          : this.players[opponentIdx].name;
       this.emit('toast', {
-        text: (pottedObj.length ? '未进本方球' : '未进球') + ' · 轮到 ' + this.players[opponentIdx].name,
+        text: (pottedObj.length ? '未进本方球' : '未进球') + ' · 轮到 ' + who,
         type: 'info'
       });
     }
@@ -1455,7 +1458,8 @@
       this.emit('save', this.save);
     } else if (this.mode === 'pvp' || this.mode === 'online') {
       // 本地双人共用一份存档：胜者加金币，败者不扣
-      coinsDelta = eco.pvpWin;
+      // pvp 本地共用存档：谁赢都给这份存档加金币；online 只有本机座位赢才加
+      coinsDelta = (this.mode === "online" && winnerIdx !== this.onlineSeat) ? 0 : eco.pvpWin;
       coins = this.applyCoins(coinsDelta);
       this.persist(this.save);
       this.emit('save', this.save);

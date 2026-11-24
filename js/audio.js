@@ -436,6 +436,14 @@
     return;
   };
 
+  AudioEngine.prototype.tick = function () {
+    this.unlock();
+    if (!this.ready || !this.enabled) return;
+    var ctx = this.ctx, t = ctx.currentTime;
+    this._tone(880, "sine", 0.08, 0.09, t);
+    this._tone(1320, "sine", 0.06, 0.05, t + 0.02);
+  };
+
   AudioEngine.prototype._startAmbience = function () {
     if (!this.ready || this.ambienceOn) return;
     this.ambienceOn = true;

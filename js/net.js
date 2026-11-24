@@ -68,6 +68,7 @@
     turnTimeout: function () { return send({ type: 'turn_timeout' }); },
     gameOver: function (winner, reason) { return send({ type: 'game_over', winnerSeat: winner, reason: reason }); },
     rematch: function () { return send({ type: 'rematch' }); },
+    rematchCancel: function () { return send({ type: 'rematch_cancel' }); },
     leave: function () { send({ type: 'leave' }); this.close(); },
     drop: function () { /* 模拟网络闪断：断底层连接但保留座位，触发自动重连 */ if (ws) { try { ws.close(); } catch (e) {} } },
     close: function () { manualClose = true; if (autoRetry) { clearTimeout(autoRetry); autoRetry = null; } if (ws) { try { ws.close(); } catch (e) {} } ws = null; connected = false; roomCode = ''; seatCode = ''; },

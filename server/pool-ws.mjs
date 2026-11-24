@@ -8,6 +8,7 @@ import { randomInt } from 'node:crypto';
 const PORT = Number(process.env.POOL_WS_PORT || 8787);
 const HOST = process.env.POOL_WS_HOST || '127.0.0.1';
 const WAIT_TTL = 30 * 60 * 1000;      // 等待中房间 30 分钟
+const REMATCH_TIMEOUT_MS = Number(process.env.POOL_WS_REMATCH_TIMEOUT_MS || 180000); // 再来一局等待超时
 const PAUSE_TIMEOUT_MS = Number(process.env.POOL_WS_PAUSE_TIMEOUT_MS || 180000); // 暂停超时（默认3分钟）
 const NO_BUSY = process.env.POOL_WS_NO_BUSY === "1"; // 测试环境可关闭串行锁
 const DISCONNECT_TTL = Number(process.env.POOL_WS_DISCONNECT_TTL || 60) * 1000; // 掉线重连窗口（默认 60 秒）
@@ -32,7 +33,7 @@ function err(ws, code, message) { send(ws, { type: 'error', code, message }); }
 function newRoom(code) {
   return { code, seats: [null, null], started: false, turn: 0, version: 0,
     lastShot: null, createdAt: Date.now(), emptySince: null, rematchUntil: null, finished: false,
-    pausedAt: null, pausedBy: -1 };
+    pausedAt: null, pausedBy: -1, rematchBy: -1, rematchAt: null };
 }
 function getRoom(code) { return rooms.get(code) || null; }
 function destroyRoom(code) { rooms.delete(code); }
@@ -63,6 +64,11 @@ function roomTick() {
       const winner = 1 - room.pausedBy;
       room.finished = true; room.pausedAt = null;
       broadcast(room, { type: 'pause_timeout', winner: winner, reason: '暂停超过 3 分钟，判暂停方弃权' });
+    }
+    if (room.rematchBy >= 0 && room.rematchAt && now - room.rematchAt > REMATCH_TIMEOUT_MS) {
+      broadcast(room, { type: 'room_closed', reason: '对方未同意再来一局，房间已断开' });
+      destroyRoom(code);
+      continue;
     }
     if (room.finished && room.rematchUntil && now > room.rematchUntil) destroyRoom(code);
     if (!room.started && now - room.createdAt > WAIT_TTL) destroyRoom(code);
@@ -213,8 +219,26 @@ wss.on('connection', (ws) => {
       }
       case 'rematch': {
         if (!ctx || !room || !room.finished) return;
-        room.finished = false; room.rematchUntil = null; room.version = 0; room.turn = 0; room.lastShot = null;
-        broadcast(room, { type: 'start', firstPlayer: 0, rematch: true });
+        // 协商：双方都点才算同意
+        if (room.rematchBy < 0) {
+          room.rematchBy = ctx.seat; room.rematchAt = Date.now();
+          broadcast(room, { type: 'rematch_pending', by: ctx.seat });
+        } else if (room.rematchBy === ctx.seat) {
+          // 同一人重复点：只提醒等待
+          send(ws, { type: 'rematch_pending', by: ctx.seat });
+        } else {
+          // 另一方同意 -> 开新局
+          room.finished = false; room.rematchUntil = null; room.version = 0; room.turn = 0;
+          room.lastShot = null; room.rematchBy = -1; room.rematchAt = null;
+          room.snapshot = null; room.finished = false; room.busy = false;
+          broadcast(room, { type: 'start', firstPlayer: 0, rematch: true });
+        }
+        break;
+      }
+      case 'rematch_cancel': {
+        if (!ctx || !room) return;
+        room.rematchBy = -1; room.rematchAt = null;
+        broadcast(room, { type: 'rematch_cancelled' });
         break;
       }
       case 'leave': {
