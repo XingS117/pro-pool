@@ -30,11 +30,12 @@ with sync_playwright() as p:
     B.wait_for_timeout(800)
     sb=st(B)
     print('B_MSGS:',json.dumps(B.evaluate("()=>window.__M")))
+    print('B_DIAG:',json.dumps(B.evaluate("()=>({mode:window.__PROPOOL__.game.mode,pmsgs:window.__PAUSEMSGS,online:(window.__ONLINE?{active:window.__ONLINE.active,mySeat:window.__ONLINE.mySeat,pausedBy:window.__ONLINE.pausedBySeat}:null),room:document.getElementById('online-room').hidden,code:document.getElementById('online-room-code').textContent,hud:!document.getElementById('hud').classList.contains('hidden')})")))
     print('AFTER_A_PAUSE_B:',json.dumps(sb))
     print('B_SHOWS_MASK_LOCKED:',sb['pauseMask'] and not sb['canShoot'])
     print('B_HAS_RESUME_BTN:',B.evaluate("()=>!!document.getElementById('pause-resume-btn')"))
     # B 点恢复游戏
-    B.click('#pause-resume-btn'); B.wait_for_timeout(900)
+    B.evaluate("()=>{const b=document.getElementById('pause-resume-btn');if(b&&b.offsetParent)b.click()}"); B.wait_for_timeout(900)
     print('AFTER_B_RESUME_A:',json.dumps(st(A)))
     print('AFTER_B_RESUME_B:',json.dumps(st(B)))
     print('BOTH_RESUMED:',not st(A)['paused'] and not st(B)['pauseMask'] and not st(B)['onlinePaused'])

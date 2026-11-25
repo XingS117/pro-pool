@@ -38,6 +38,17 @@
         var m; try { m = JSON.parse(ev.data); } catch (e) { return; }
         if (m.type === 'room_created') { roomCode = m.code; seat = m.seat; seatCode = m.seatCode; }
         if (m.type === 'room_joined') { roomCode = m.code; seat = m.seat; seatCode = m.seatCode; }
+        // pause_state 兜底：直接切遮罩，避免 listener 注册时序问题
+        if (m.type === 'pause_state' && typeof document !== 'undefined') {
+          var pm = document.getElementById('pause-mask');
+          if (pm) pm.hidden = !m.paused;
+          var G = window.__PROPOOL__ && window.__PROPOOL__.game;
+          if (G && G.mode === 'online') G._onlinePaused = !!m.paused;
+        }
+        if (m.type === 'force_resume') {
+          var GR = window.__PROPOOL__ && window.__PROPOOL__.game;
+          if (GR && GR.mode === 'online' && GR.paused) GR.resume();
+        }
         emit(m.type, m); emit('message', m);
       };
     });
@@ -71,6 +82,7 @@
     rematchCancel: function () { return send({ type: 'rematch_cancel' }); },
     leave: function () { send({ type: 'leave' }); this.close(); },
     drop: function () { /* 模拟网络闪断：断底层连接但保留座位，触发自动重连 */ if (ws) { try { ws.close(); } catch (e) {} } },
+    clearRoom: function () { roomCode = ''; seatCode = ''; seat = -1; },
     close: function () { manualClose = true; if (autoRetry) { clearTimeout(autoRetry); autoRetry = null; } if (ws) { try { ws.close(); } catch (e) {} } ws = null; connected = false; roomCode = ''; seatCode = ''; },
     on: function (ev, fn) { return sub(ev, fn); },
     off: function (ev, fn) { return unsub(ev, fn); },

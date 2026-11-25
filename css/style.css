@@ -1964,7 +1964,7 @@ body.ingame.mode-pvp .player-card.is-idle{border-radius:11px}
 /* 边框清晰度增强 */
 .hud-bottom .angle-strip,.hud-bottom .power-track,.hud-bottom .angle-preset,.scoreboard .player-card{border-color:rgba(230,214,180,.42)!important}
 .scoreboard .player-card.is-active{border-color:rgba(240,200,110,.85)!important;box-shadow:0 0 0 1px rgba(240,200,110,.28),0 6px 18px rgba(0,0,0,.4)!important}
-.scoreboard .ball-strip .ball-chip{border-color:rgba(230,214,180,.55)!important;color:var(--cream)!important;background:rgba(255,255,255,.10)!important}
+.scoreboard .ball-strip .ball-chip{border-color:rgba(230,214,180,.55)!important;color:var(--cream)!important}
 .scoreboard .ball-strip .ball-chip.empty{border-color:rgba(230,214,180,.25)!important;background:rgba(0,0,0,.35)!important}
 
 /* mobile-orb-white: 手机端击球点球保持白球形象 */
@@ -1974,3 +1974,8 @@ body.ingame.mode-pvp .player-card.is-idle{border-radius:11px}
 }
 #screen-result .result-actions{display:flex;align-items:stretch;gap:8px}
 #screen-result .result-actions button{flex:0 0 38%}
+
+/* fullscreen-angle-up: 全屏下角度条与预设同样上移 */
+:fullscreen body.ingame .hud-bottom,
+body:fullscreen .hud-bottom,
+body.ingame:has(#btn-fullscreen.is-on) .hud-bottom{bottom:max(12px,calc(env(safe-area-inset-bottom) + 8px))}

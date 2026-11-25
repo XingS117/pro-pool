@@ -142,7 +142,7 @@ wss.on('connection', (ws) => {
         bySocket.set(ws, { roomCode: code, seat: 1 });
         send(ws, { type: 'room_joined', code, seat: 1, seatCode: sc, opponent: '玩家1' });
         r.started = true; r.turn = 0; r.version = 0; r.finished = false; resetTurnClock(r); r.rematchUntil = null;
-        broadcast(r, { type: 'start', firstPlayer: 0 });
+        broadcast(r, { type: 'start', firstPlayer: 0, elapsed: turnElapsedMs(r) });
         break;
       }
       case 'rejoin': {
@@ -162,7 +162,7 @@ wss.on('connection', (ws) => {
           }
         }
         send(ws, { type: 'room_joined', code, seat: idx, seatCode: seat.seatCode, opponent: '对手' });
-        if (r.started) send(ws, { type: 'resume', turn: r.turn, snapshot: r.snapshot, lastShot: r.lastShot });
+        if (r.started) send(ws, { type: 'resume', turn: r.turn, snapshot: r.snapshot, lastShot: r.lastShot, elapsed: turnElapsedMs(r) });
         break;
       }
       case 'shot': {
@@ -232,7 +232,7 @@ wss.on('connection', (ws) => {
         else room.turn = 1 - ctx.seat;
         resetTurnClock(room);
         // 广播权威回合给双方，强制对齐（犯规换手两端可能不一致）
-        broadcast(room, { type: 'turn_sync', seat: room.turn });
+        broadcast(room, { type: 'turn_sync', seat: room.turn, elapsed: turnElapsedMs(room) });
         break;
       }
       case 'game_over': {
@@ -255,7 +255,7 @@ wss.on('connection', (ws) => {
           room.finished = false; room.rematchUntil = null; room.version = 0; room.turn = 0;
           room.lastShot = null; room.rematchBy = -1; room.rematchAt = null; resetTurnClock(room);
           room.snapshot = null; room.finished = false; room.busy = false;
-          broadcast(room, { type: 'start', firstPlayer: 0, rematch: true });
+          broadcast(room, { type: 'start', firstPlayer: 0, rematch: true, elapsed: 0 });
         }
         break;
       }

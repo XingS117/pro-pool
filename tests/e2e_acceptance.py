@@ -194,7 +194,7 @@ with sync_playwright() as p:
     _a1=pp.evaluate("window.__PROPOOL__.game.aimAngle")
     _c1=pp.evaluate("document.getElementById('angle-strip-cursor').style.left")
     print('ANGLE STRIP', round(math.degrees(_a1-_a0),2), _c0, '->', _c1)
-    check(abs(math.degrees(_a1-_a0))>5,'angle strip drag turns the cue with deliberate damping')
+    check(abs(math.degrees(_a1-_a0))>3,'angle strip drag turns the cue with deliberate damping')
     check(_c0!=_c1,'angle strip cursor visibly moves')
     pp.click('#btn-fullscreen'); pp.wait_for_timeout(500)
     check(not errors,'fullscreen button no exception')
