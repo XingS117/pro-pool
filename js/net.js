@@ -52,7 +52,7 @@
             GT.activePlayer = m.seat;
             GT.turnTime = (m.elapsed || 0) / 1000; GT.deadlineAt = Date.now() + (45000 - (m.elapsed || 0) * 1000);
             GT._turnTimedOut = false;
-            GT.ballInHand = false; GT.freeBallSeat = -1; GT.ballReAdjust = false;
+            // freeBallSeat 由 state_sync 权威下发，不在这里清（否则两端自由球归属不一致）
           }
         }
         if (m.type === 'force_resume') {

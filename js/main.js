@@ -1259,7 +1259,7 @@ command('online', function () {
       else showToast({ text: '房间号：' + code, type: 'info' });
     });
     Pool.Net.on('start', function (m) {
-      if (m.code && Pool.Net.state.roomCode && m.code !== Pool.Net.state.roomCode) return; // 迟到的其他房间 start
+      if (!m.rematch && m.code && Pool.Net.state.roomCode && m.code !== Pool.Net.state.roomCode) return; // 迟到房间 start；rematch 例外
       if (m.resumed) return;   // 重连恢复走 resume 消息，绝不能重新开局
       online.active = true; online.version = 0; online.waiting = false;
       clearReconnectWait();
@@ -1415,6 +1415,7 @@ command('online', function () {
       if (!online.active) return;
       clearReconnectWait(); online.opponentConnected = true;
       showToast({ text: '对手已重连，对局继续', type: 'good' });
+      if (game && game.exportState && Pool.Net.stateSync) Pool.Net.stateSync({ snapshot: game.exportState() });
       refreshHud();
     });
     Pool.Net.on('game_over', function (m) { showToast({ text: '对局结束', type: 'info' }); });
