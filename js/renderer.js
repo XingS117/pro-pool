@@ -638,8 +638,8 @@
     var w = this.cssW, h = this.cssH;
     var outerW = cfg.width + this.FRAME * 2;
     var outerH = cfg.height + this.FRAME * 2;
-    var padX = Math.max(rot ? 1 : 8, w * (rot ? 0.002 : 0.018));
-    var padY = Math.max(rot ? 2 : 4, h * 0.016);
+    var padX = Math.max(rot ? 1 : 8, w * (rot ? 0.001 : 0.018));
+    var padY = Math.max(rot ? 2 : 4, h * (rot ? 0.010 : 0.016));
     var ins = this.insets || { top: 0, right: 0, bottom: 0, left: 0 };
     var availW = Math.max(40, w - ins.left - ins.right);
     var availH = Math.max(40, h - ins.top - ins.bottom);

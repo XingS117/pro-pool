@@ -439,9 +439,11 @@
   AudioEngine.prototype.tick = function () {
     this.unlock();
     if (!this.ready || !this.enabled) return;
+    // 手机端合成音太小，优先用已加载的清晰 turn 采样；失败再用合成双音。
+    if (this._playSample && this._playSample("turn", 0.5, 1.08, 9000, 0.012)) return;
     var ctx = this.ctx, t = ctx.currentTime;
-    this._tone(880, "sine", 0.08, 0.09, t);
-    this._tone(1320, "sine", 0.06, 0.05, t + 0.02);
+    this._tone(880, "sine", 0.09, 0.16, t);
+    this._tone(1320, "sine", 0.075, 0.10, t + 0.02);
   };
 
   AudioEngine.prototype._startAmbience = function () {

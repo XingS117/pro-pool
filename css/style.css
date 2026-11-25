@@ -1124,7 +1124,7 @@ body.ingame .icon-btn svg{width:16px;height:16px}
   box-shadow:inset -6px -8px 14px rgba(55,50,42,.35),inset 4px 6px 12px rgba(255,255,255,.45),0 10px 22px rgba(0,0,0,.5);
   transition:filter .2s,transform .15s}
 .spin-orb:hover{transform:scale(1.05)}
-.spin-orb.is-disabled{filter:grayscale(.85) brightness(.5)}
+.spin-orb.is-disabled{filter:none;opacity:.55;box-shadow:inset -3px -4px 8px rgba(60,55,45,.18),inset 2px 3px 6px rgba(255,255,255,.55),0 4px 10px rgba(0,0,0,.35)}
 .spin-orb-ring{position:absolute;inset:8px;border-radius:50%;border:1px dashed rgba(83,77,64,.38)}
 .spin-orb-cross{position:absolute;background:rgba(68,61,50,.32)}
 .spin-orb-cross.h{left:10px;right:10px;top:50%;height:1px}
@@ -1979,3 +1979,19 @@ body.ingame.mode-pvp .player-card.is-idle{border-radius:11px}
 :fullscreen body.ingame .hud-bottom,
 body:fullscreen .hud-bottom,
 body.ingame:has(#btn-fullscreen.is-on) .hud-bottom{bottom:max(48px,calc(env(safe-area-inset-bottom) + 40px))}
+
+/* -------- 高可见边界（移动/桌面统一） -------- */
+#angle-strip,.angle-strip,.power-track,.angle-step,#power-block,.player-card{
+  border:1px solid rgba(240,225,190,.72)!important;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.10),0 0 0 1px rgba(0,0,0,.28)!important;
+}
+.angle-step{background:rgba(20,28,22,.72)!important;color:var(--cream)!important}
+#screen-result .result-actions{display:flex;align-items:stretch;gap:8px}
+#screen-result .result-actions>*{flex:1 1 0;min-width:0}
+
+/* 球台尽量铺满：缩小非游戏 HUD 占位 */
+@media (pointer:coarse) and (orientation:portrait){
+  body.ingame .hud-bottom{bottom:max(24px,calc(env(safe-area-inset-bottom) + 16px))}
+  :fullscreen body.ingame .hud-bottom,body:fullscreen .hud-bottom{
+    bottom:max(24px,calc(env(safe-area-inset-bottom) + 16px))}
+}

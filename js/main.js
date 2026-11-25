@@ -222,7 +222,7 @@
     if (b) right = Math.max(0, Math.ceil(W - b.left) + gap);
     top = Math.min(top, Math.round(H * 0.26));
     bottom = Math.min(bottom, Math.round(H * 0.26));
-    right = Math.min(right, Math.round(W * 0.30));
+    right = Math.min(right, Math.round(W * 0.22));
     return { top: top, bottom: bottom, left: left, right: right };
   }
 
@@ -730,60 +730,54 @@ command('online', function () {
 
   /* 力度条：按住即自动蓄力，向下拖拽则「拉到哪就是多少力度」，松手出杆。
    * 与画布左键 / Space / 触屏出杆按钮共用同一套 beginCharge/releaseShot。 */
-  function bindPowerTrack() {
-    var track = $('power-track');
+function bindPowerTrack() {
+    var track = $("power-track");
     if (!track) return;
-    // 手指比 26px 的力度条粗得多，pointer 事件挂在整块控件上，映射仍按力度条本身换算
-    var hit = $('power-block') || track;
-    var dragId = null, startY = 0, startPower = 0, travel = 120;
-    /* 往下拖 = 力度变大（用户明确要求的方向）。
-     * 按下后先记录起手位置与当前力度，拖动时按"往下拖了多少"线性加力；
-     * 按住的自动蓄力仍然有效，第一次移动才锚定，不会被瞬间抹掉。 */
-    function applyPower(p) {
-      game.setChargeManual(U.clamp01(p));
-      updatePowerUI(game.getState());
-    }
-    hit.addEventListener('pointerdown', function (e) {
+    var hit = $("power-block") || track;
+    var dragId = null, startY = 0, lastY = 0, startPower = 0, travel = 120;
+    function powerFromY(y) { return U.clamp01(startPower + (y - startY) / travel); }
+    function applyPower(p) { game.setChargeManual(U.clamp01(p)); updatePowerUI(game.getState()); }
+    hit.addEventListener("pointerdown", function (e) {
       if (!canHumanAct() || game.charging) return;
       e.preventDefault(); e.stopPropagation();
       if (audio) audio.unlock();
       dragId = e.pointerId;
-      startY = e.clientY;
+      startY = e.clientY; lastY = e.clientY;
       startPower = game.power || 0;
       var tr = track.getBoundingClientRect();
       travel = Math.max(80, (tr.height || 160) * 0.82);
-      try { hit.setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
-      if (game.beginCharge()) applyPower(startPower);
+      try { hit.setPointerCapture(e.pointerId); } catch (err) {}
+      if (game.beginCharge()) applyPower(Math.max(startPower, 0.015));
     });
-    hit.addEventListener('pointermove', function (e) {
+    hit.addEventListener("pointermove", function (e) {
       if (dragId === null || e.pointerId !== dragId) return;
       e.preventDefault(); e.stopPropagation();
-      applyPower(startPower + (e.clientY - startY) / travel);
+      lastY = e.clientY;
+      applyPower(powerFromY(lastY));
     });
     function finish(e) {
       if (dragId === null || (e && e.pointerId !== dragId)) return;
-      if (e) { e.preventDefault(); e.stopPropagation(); }
-      dragId = null; rect = null;
+      if (e) { e.preventDefault(); e.stopPropagation(); if (typeof e.clientY === "number") lastY = e.clientY; }
+      // 松开前再按最后一次位置计算一次，避免快速滑动时 pointermove 丢失
+      if (game.charging) applyPower(powerFromY(lastY));
+      dragId = null;
       if (game.charging) {
-        // 0% 附近误触/轻点不算出杆：避免从 0 拉动手一抖就归零出杆
-        if ((game.power || 0) < 0.05 && typeof game.cancelCharge === "function") {
+        if ((game.power || 0) < 0.02 && typeof game.cancelCharge === "function") {
           game.cancelCharge();
-          showToast({ text: "力度太小，未出杆", type: "info" });
         } else {
-          game.releaseShot();
-          aimLocked = false;
+          game.releaseShot(); aimLocked = false;
         }
         updatePowerUI(game.getState());
       }
     }
-    hit.addEventListener('pointerup', finish);
-    hit.addEventListener('pointercancel', function (e) {
+    hit.addEventListener("pointerup", finish);
+    hit.addEventListener("pointercancel", function (e) {
       if (dragId === null) return;
-      dragId = null; rect = null;
-      if (game.charging) game.cancelCharge();
+      dragId = null;
+      if (game.charging && typeof game.cancelCharge === "function") game.cancelCharge();
       updatePowerUI(game.getState());
     });
-  }
+}
 
   /* 底部角度刻度尺：左右拖拽做角度精调（每像素 0.02°）。
    * 球台外的角度调整只允许走这里，不经过画布。 */
