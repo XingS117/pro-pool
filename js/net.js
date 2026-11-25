@@ -50,7 +50,7 @@
           var GT = window.__PROPOOL__.game;
           if (GT && GT.mode === 'online' && typeof m.seat === 'number') {
             GT.activePlayer = m.seat;
-            GT.turnTime = (m.elapsed || 0) / 1000;
+            GT.turnTime = (m.elapsed || 0) / 1000; GT.deadlineAt = Date.now() + (45000 - (m.elapsed || 0) * 1000);
             GT._turnTimedOut = false;
             GT.ballInHand = false; GT.freeBallSeat = -1; GT.ballReAdjust = false;
           }

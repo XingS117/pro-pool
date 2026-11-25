@@ -146,7 +146,7 @@ wss.on('connection', (ws) => {
         bySocket.set(ws, { roomCode: code, seat: 1 });
         send(ws, { type: 'room_joined', code, seat: 1, seatCode: sc, opponent: '玩家1' });
         r.started = true; r.turn = 0; r.version = 0; r.finished = false; resetTurnClock(r); r.rematchUntil = null;
-        broadcast(r, { type: 'start', firstPlayer: 0, elapsed: turnElapsedMs(r) });
+        broadcast(r, { type: 'start', code: r.code, firstPlayer: 0, elapsed: turnElapsedMs(r) });
         break;
       }
       case 'rejoin': {
@@ -259,7 +259,7 @@ wss.on('connection', (ws) => {
           room.finished = false; room.rematchUntil = null; room.version = 0; room.turn = 0;
           room.lastShot = null; room.rematchBy = -1; room.rematchAt = null; resetTurnClock(room);
           room.snapshot = null; room.finished = false; room.busy = false;
-          broadcast(room, { type: 'start', firstPlayer: 0, rematch: true, elapsed: 0 });
+          broadcast(room, { type: 'start', code: room.code, firstPlayer: 0, rematch: true, elapsed: 0 });
         }
         break;
       }
@@ -290,7 +290,10 @@ function leave(ctx, room, ws) {
   if (!ctx || !room) return;
   const seat = room.seats[ctx.seat];
   if (seat) room.seats[ctx.seat] = null;
-  broadcast(room, { type: 'opponent_left', reason: 'leave' });
+  if (room.rematchBy === ctx.seat) { room.rematchBy = -1; room.rematchAt = null; }
+  if (room.pausedBy === ctx.seat) { room.pausedAt = null; room.pausedBy = -1; }
+  if (!room.seats.some(x => x && x.connected)) rooms.delete(room.code);
+  else broadcast(room, { type: "opponent_left", reason: "leave" });
   if (ws) bySocket.delete(ws);
 }
 server.listen(PORT, HOST, () => console.log(`pool-ws listening on ${HOST}:${PORT}`));

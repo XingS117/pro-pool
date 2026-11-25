@@ -1259,6 +1259,7 @@ command('online', function () {
       else showToast({ text: '房间号：' + code, type: 'info' });
     });
     Pool.Net.on('start', function (m) {
+      if (m.code && Pool.Net.state.roomCode && m.code !== Pool.Net.state.roomCode) return; // 迟到的其他房间 start
       if (m.resumed) return;   // 重连恢复走 resume 消息，绝不能重新开局
       online.active = true; online.version = 0; online.waiting = false;
       clearReconnectWait();
@@ -1268,7 +1269,7 @@ command('online', function () {
       if (game) {
         game.onlineSeat = online.mySeat;
         game.activePlayer = m.firstPlayer;   // 仅开局先手由服务器统一指定
-        game.turnTime = (m.elapsed || 0) / 1000;
+        game.turnTime = (m.elapsed || 0) / 1000; online.deadlineAt = Date.now() + (45000 - (m.elapsed || 0) * 1000);
       }
       showToast({ text: m.rematch ? '再来一局！' : (m.firstPlayer === online.mySeat ? '你先手，开球！' : '对手先手，请等待'), type: 'good' });
       refreshHud();
@@ -1302,8 +1303,9 @@ command('online', function () {
       if (!online.active) return;
       if (!game || game.mode !== "online") return;
       game.activePlayer = t.seat;
-      game.turnTime = (t.elapsed || 0) / 1000; game._turnTimedOut = false;
+      game.turnTime = (t.elapsed || 0) / 1000; online.deadlineAt = Date.now() + (45000 - (t.elapsed || 0) * 1000); game._turnTimedOut = false;
       game.ballInHand = false; game.freeBallSeat = -1; game.ballReAdjust = false;
+      if (audio && audio.turnSwitch) audio.turnSwitch();
       showToast({ text: "本杆超时 · 自动换手", type: "foul" });
       refreshHud();
     });
@@ -1385,7 +1387,7 @@ command('online', function () {
     Pool.Net.on("turn_sync", function (t) {
       if (!online.active) return;
       if (!game || game.mode !== "online" || game.phase === "over") return;
-      if (typeof t.elapsed === 'number' && game) game.turnTime = t.elapsed / 1000;
+      if (typeof t.elapsed === 'number' && game) { game.turnTime = t.elapsed / 1000; online.deadlineAt = Date.now() + (45000 - t.elapsed * 1000); }
       if (game.activePlayer !== t.seat) {
         game.activePlayer = t.seat;
         refreshHud();
@@ -1401,7 +1403,7 @@ command('online', function () {
       if (game && game.mode === "online" && m.snapshot && game.applyState) {
         game.applyState(m.snapshot);
         game.onlineSeat = online.mySeat;
-        if (typeof m.elapsed === 'number') game.turnTime = m.elapsed / 1000;
+        if (typeof m.elapsed === 'number') { game.turnTime = m.elapsed / 1000; online.deadlineAt = Date.now() + (45000 - m.elapsed * 1000); }
         showToast({ text: "已恢复对局", type: "good" });
       } else if (game && game.mode !== "online") {
         startMatch("online");
@@ -1717,11 +1719,9 @@ command('online', function () {
   }
 
   function showMenu() {
-    if (online.active && window.Pool && Pool.Net) {
-      try { Pool.Net.leave(); } catch (e) {}
-      online.active = false; clearRoomUI();
-      online.active = false;
-    }
+    if (window.Pool && Pool.Net) { try { Pool.Net.leave(); } catch (e) {} }
+    online.active = false; clearRoomUI();
+    stopPauseCountdown(); stopRematchCountdown();
     stopPauseCountdown(); stopRematchCountdown();
     if (resultTimer) { clearTimeout(resultTimer); resultTimer = null; }
     orientationPaused = false;
@@ -1913,7 +1913,10 @@ command('online', function () {
     if (game.mode !== "online" || s.phase !== "aim" || s.isAI || game.paused || game._onlinePaused || s.ballInHand) {
       el.hidden = true; return;
     }
-    var left = Math.max(0, 45 - (game.turnTime || 0));
+    var left;
+    var dl = game.deadlineAt || online.deadlineAt;
+    if (dl) left = Math.max(0, (dl - Date.now()) / 1000);
+    else left = Math.max(0, 45 - (game.turnTime || 0));
     if (left > 10) { el.hidden = true; return; }
     el.hidden = false;
     var n = Math.ceil(left);
