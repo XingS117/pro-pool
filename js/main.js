@@ -1297,9 +1297,7 @@ command('online', function () {
       online.active = false;
     });
     Pool.Net.on("group_assigned", function (g) { showGroupToast(g); });
-      if (!online.active) return;
     Pool.Net.on("cue_placed", function (p) { onCuePlacedRemote(p); });
-      if (!online.active) return;
     Pool.Net.on("turn_timeout", function (t) {
       if (!online.active) return;
       if (!game || game.mode !== "online") return;

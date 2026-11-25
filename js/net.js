@@ -45,6 +45,16 @@
           var G = window.__PROPOOL__ && window.__PROPOOL__.game;
           if (G && G.mode === 'online') G._onlinePaused = !!m.paused;
         }
+        // turn_timeout/turn_sync 兜底：直接对齐权威回合，避免 listener 未执行导致双方锁死
+        if ((m.type === 'turn_timeout' || m.type === 'turn_sync') && window.__PROPOOL__) {
+          var GT = window.__PROPOOL__.game;
+          if (GT && GT.mode === 'online' && typeof m.seat === 'number') {
+            GT.activePlayer = m.seat;
+            GT.turnTime = (m.elapsed || 0) / 1000;
+            GT._turnTimedOut = false;
+            GT.ballInHand = false; GT.freeBallSeat = -1; GT.ballReAdjust = false;
+          }
+        }
         if (m.type === 'force_resume') {
           var GR = window.__PROPOOL__ && window.__PROPOOL__.game;
           if (GR && GR.mode === 'online' && GR.paused) GR.resume();

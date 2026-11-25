@@ -1795,7 +1795,7 @@ body.ingame .hud-bottom{height:44px}
 body.ingame .ball-strip{gap:5px}
 @media (orientation:portrait) and (max-width:1024px){
   body.ingame .hud-top{left:4px;width:calc(100% - 62px);right:auto;z-index:8}
-  body.ingame .hud-bottom{bottom:max(12px,calc(env(safe-area-inset-bottom) + 8px))}
+  body.ingame .hud-bottom{bottom:max(72px,calc(env(safe-area-inset-bottom) + 64px))}
   body.ingame .angle-strip{height:18px}
   body.ingame .angle-step{height:22px}
   body.ingame .ball-strip{gap:2px}
@@ -1958,7 +1958,7 @@ body.ingame.mode-pvp .player-card.is-idle{border-radius:11px}
 
 /* mobile-angle-up: 角度条上移，离球台更近但避免误触 */
 @media (max-width: 520px) {
-  body.ingame .hud-bottom{bottom:max(12px,calc(env(safe-area-inset-bottom) + 8px))}
+  body.ingame .hud-bottom{bottom:max(72px,calc(env(safe-area-inset-bottom) + 64px))}
 }
 
 /* 边框清晰度增强 */
@@ -1978,4 +1978,4 @@ body.ingame.mode-pvp .player-card.is-idle{border-radius:11px}
 /* fullscreen-angle-up: 全屏下角度条与预设同样上移 */
 :fullscreen body.ingame .hud-bottom,
 body:fullscreen .hud-bottom,
-body.ingame:has(#btn-fullscreen.is-on) .hud-bottom{bottom:max(12px,calc(env(safe-area-inset-bottom) + 8px))}
+body.ingame:has(#btn-fullscreen.is-on) .hud-bottom{bottom:max(72px,calc(env(safe-area-inset-bottom) + 64px))}

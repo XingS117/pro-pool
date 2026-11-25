@@ -46,8 +46,12 @@ function pauseTurnClock(room) {
 }
 function resumeTurnClock(room) { room.turnStartedAt = Date.now(); }
 function turnElapsedMs(room) {
-  if (!room.turnStartedAt) return room.turnElapsed || 0;
-  return (room.turnElapsed || 0) + (Date.now() - room.turnStartedAt);
+  // 累加式：每个 tick 将增量并入 turnElapsed；暂停时 turnStartedAt=0 自然冻结。
+  if (room.turnStartedAt) {
+    room.turnElapsed = (room.turnElapsed || 0) + (Date.now() - room.turnStartedAt);
+    room.turnStartedAt = Date.now();
+  }
+  return room.turnElapsed || 0;
 }
 
 function destroyRoom(code) { rooms.delete(code); }
